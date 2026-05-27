@@ -57,7 +57,15 @@ assertTruthy("Kraken proof verifier returns proof hash", krakenVerification.veri
 
 const summary = {
   ok: assertions.every((item) => item.ok),
+  mode: "kraken_integration_fresh",
   generated_at: generatedAt,
+  side_effects: {
+    autochain_write: false,
+    autochain_mint: false,
+    autochain_gate_advance: false,
+    kraken_paper_trade: true,
+    kraken_dual_receipt_sync: krakenTrade.tradeReceipt?.dualSync?.synced === true
+  },
   urls: {
     autochain_app: "https://autochain-eight.vercel.app",
     autochain_mcp: autochainMcpUrl,
@@ -98,18 +106,19 @@ const summary = {
 };
 
 if (!summary.ok) {
-  throw new Error("Full-chain proof assertions failed.");
+  throw new Error("Kraken integration proof assertions failed.");
 }
 
 await mkdir(outputDir, { recursive: true });
 const slug = generatedAt.replace(/[:.]/g, "-");
-const jsonPath = join(outputDir, `autochain-full-chain-proof-${slug}.json`);
-const mdPath = join(outputDir, `autochain-full-chain-proof-${slug}.md`);
+const jsonPath = join(outputDir, `autochain-kraken-integration-proof-${slug}.json`);
+const mdPath = join(outputDir, `autochain-kraken-integration-proof-${slug}.md`);
 await writeFile(jsonPath, `${JSON.stringify(summary, null, 2)}\n`);
 await writeFile(mdPath, markdownSummary(summary));
 
 console.log(JSON.stringify({
   ok: true,
+  mode: summary.mode,
   json: jsonPath,
   markdown: mdPath,
   autochain_state: summary.autochain.state,
@@ -118,7 +127,8 @@ console.log(JSON.stringify({
   kraken_status: summary.kraken.status,
   kraken_receipt: summary.kraken.trade_receipt_id,
   kraken_proof_hash: summary.kraken.proof_hash,
-  publicWrites: false
+  autochainPublicWrites: false,
+  krakenPaperTrade: true
 }, null, 2));
 
 async function assertMcpServer(url, expectedName) {
@@ -178,17 +188,19 @@ function assertFalse(label, value) {
 }
 
 function markdownSummary(summary) {
-  return `# AutoChain Full-Chain Proof
+  return `# AutoChain Kraken Integration Proof
 
 Generated: ${summary.generated_at}
 
 ## Result
 
 - Status: ${summary.ok ? "passed" : "failed"}
+- Mode: ${summary.mode}
 - AutoChain state: ${summary.autochain.state}
 - AutoChain next gate: ${summary.autochain.next_gate}
 - Kraken status: ${summary.kraken.status}
 - Public writes to AutoChain: ${summary.kraken.public_writes_to_autochain}
+- Kraken paper trade executed: ${summary.side_effects.kraken_paper_trade}
 
 ## AutoChain
 
@@ -216,6 +228,14 @@ Generated: ${summary.generated_at}
 - Proof verifier ok: ${summary.kraken.proof_ok}
 - Proof complete: ${summary.kraken.proof_complete}
 - Receipt DUAL synced: ${summary.kraken.receipt_dual_synced}
+
+## Side Effects
+
+- AutoChain write: ${summary.side_effects.autochain_write}
+- AutoChain mint: ${summary.side_effects.autochain_mint}
+- AutoChain gate advance: ${summary.side_effects.autochain_gate_advance}
+- Kraken paper trade: ${summary.side_effects.kraken_paper_trade}
+- Kraken DUAL receipt sync: ${summary.side_effects.kraken_dual_receipt_sync}
 
 ## Assertions
 

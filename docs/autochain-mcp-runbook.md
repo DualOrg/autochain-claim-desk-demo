@@ -16,6 +16,16 @@ npm run agent:harness
 
 The harness connects to `/mcp`, reads the live DUAL-backed claim, evaluates the next gate, previews the event-bus update payload, and prints the object id, state, next gate, decision hash, payload styles, and `public_writes=false`.
 
+## Standalone proof flow
+
+Use this for the default AutoChain proof. It is AutoChain-only and does not call Kraken or any other external demo.
+
+```text
+npm run proof:chain
+```
+
+The proof initializes AutoChain MCP, reads the live claim, confirms the standalone demo target `Approved -> paid`, evaluates the next gate read-only, previews sync and mint payloads without executing them, verifies write tools are operator-gated, and writes proof artifacts under `outputs/`.
+
 ## Operator sync flow
 
 Use this when an operator wants to prove the MCP write path without advancing the claim.

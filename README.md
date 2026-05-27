@@ -81,13 +81,21 @@ Agent harness:
 npm run agent:harness
 ```
 
-Full-chain proof run:
+Standalone AutoChain proof:
 
 ```text
 npm run proof:chain
 ```
 
-The proof run reads the live AutoChain object over MCP, confirms `Approved -> paid`, executes one Kraken paper trade with AutoChain MCP observation, verifies the AutoChain decision hash is present in the Kraken proposal, receipt, and proof bundle, then writes JSON and Markdown artifacts under `outputs/`.
+`proof:chain` is AutoChain-only. It initializes the AutoChain MCP server, reads the live DUAL-backed claim, confirms the standalone demo target `Approved -> paid`, evaluates the next gate read-only, previews sync and mint payloads without executing them, verifies write tools are operator-gated, and writes JSON and Markdown artifacts under `outputs/`.
+
+Optional cross-demo Kraken integration proof:
+
+```text
+npm run proof:kraken:fresh
+```
+
+This is not part of the standalone AutoChain product path. It exists only to prove that another demo can consume the AutoChain MCP decision hash. It executes one Kraken paper trade and may sync a Kraken DUAL receipt, while keeping AutoChain read-only.
 
 Operator-gated harness modes:
 
@@ -96,7 +104,7 @@ AUTOCHAIN_OPERATOR_TOKEN=[REDACTED] AUTOCHAIN_WRITE_ACTION=sync npm run agent:ha
 AUTOCHAIN_OPERATOR_TOKEN=[REDACTED] AUTOCHAIN_WRITE_ACTION=advance npm run agent:harness
 ```
 
-See `docs/autochain-mcp-runbook.md` for the read-only, sync, advance, and controlled mint boundaries.
+See `docs/autochain-mcp-runbook.md` for the read-only, sync, advance, and controlled mint boundaries. See `docs/cross-demo-proof.md` for the optional Kraken proof boundary.
 
 ## DUAL Object Model
 
