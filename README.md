@@ -81,6 +81,14 @@ Agent harness:
 npm run agent:harness
 ```
 
+Full-chain proof run:
+
+```text
+npm run proof:chain
+```
+
+The proof run reads the live AutoChain object over MCP, confirms `Approved -> paid`, executes one Kraken paper trade with AutoChain MCP observation, verifies the AutoChain decision hash is present in the Kraken proposal, receipt, and proof bundle, then writes JSON and Markdown artifacts under `outputs/`.
+
 Operator-gated harness modes:
 
 ```text
