@@ -452,8 +452,7 @@ function resetDemo() {
   localStorage.removeItem("dual-autochain-state");
   saveState();
   render();
-  refreshStatus().catch(() => {});
-  refreshCurrentClaim().catch(() => {});
+  refreshStatus().then(() => refreshCurrentClaim()).catch(() => {});
 }
 
 function labelize(value) {
@@ -485,5 +484,4 @@ function showError(error) {
 }
 
 render();
-refreshStatus().catch(() => {});
-refreshCurrentClaim().catch(() => {});
+refreshStatus().then(() => refreshCurrentClaim()).catch(() => {});
