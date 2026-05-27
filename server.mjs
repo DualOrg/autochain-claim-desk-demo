@@ -7,6 +7,7 @@ import currentHandler from "./api/claims/current.js";
 import evaluateHandler from "./api/claims/evaluate.js";
 import syncHandler from "./api/claims/sync.js";
 import mintHandler from "./api/claims/mint.js";
+import { readCurrentObject, readiness } from "./api/_dual.js";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 await loadDotEnv();
@@ -80,13 +81,42 @@ async function serveStatic(pathname, res) {
     res.statusCode = 200;
     res.setHeader("content-type", mimeTypes[extname(filePath)] || "application/octet-stream");
     res.setHeader("cache-control", "no-store");
-    res.end(file);
+    res.end(requested === "/index.html" ? await injectBootPayload(file.toString("utf8")) : file);
   } catch {
     const fallback = await readFile(join(root, "index.html"));
     res.statusCode = 200;
     res.setHeader("content-type", mimeTypes[".html"]);
     res.setHeader("cache-control", "no-store");
-    res.end(fallback);
+    res.end(await injectBootPayload(fallback.toString("utf8")));
+  }
+}
+
+async function injectBootPayload(html) {
+  const payload = await buildBootPayload();
+  const json = JSON.stringify(payload).replace(/</g, "\\u003c");
+  const boot = `<script id="autochain-boot" type="application/json">${json}</script>`;
+  return html.replace("<script type=\"module\"", `${boot}\n    <script type=\"module"`);
+}
+
+async function buildBootPayload() {
+  const status = readiness();
+  if (!status.readbackReady) return { dualStatus: status };
+  try {
+    const current = await readCurrentObject();
+    return {
+      dualStatus: current.status || status,
+      claim: current.properties || null
+    };
+  } catch (error) {
+    return {
+      dualStatus: {
+        ...status,
+        ok: false,
+        readbackReady: false,
+        writable: false,
+        detail: error.message
+      }
+    };
   }
 }
 

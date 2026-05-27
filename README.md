@@ -16,7 +16,7 @@ The demo shows an OEM warranty administrator validating one dealer claim for a B
 Production target:
 
 ```text
-https://autochain-claim-desk.vercel.app
+https://autochain-eight.vercel.app
 ```
 
 ## Run Locally

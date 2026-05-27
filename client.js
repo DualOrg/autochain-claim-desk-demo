@@ -108,6 +108,8 @@ const $ = (id) => document.getElementById(id);
 function loadState() {
   const demo = requestedDemoState();
   if (demo) return demo;
+  const boot = bootState();
+  if (boot) return boot;
   const stored = localStorage.getItem("dual-autochain-state");
   if (!stored) return clone(initialState);
   try {
@@ -121,6 +123,31 @@ function loadState() {
     };
   } catch {
     return clone(initialState);
+  }
+}
+
+function bootState() {
+  const node = document.getElementById("autochain-boot");
+  if (!node?.textContent) return null;
+  try {
+    const payload = JSON.parse(node.textContent);
+    if (!payload?.dualStatus?.readbackReady || !payload?.claim) return null;
+    return {
+      ...clone(initialState),
+      dualStatus: payload.dualStatus,
+      claim: { ...clone(initialState.claim), ...payload.claim },
+      proof: {
+        ...clone(initialState.proof),
+        policy_hash: payload.claim.policy_hash,
+        serial_hash: payload.claim.serial_hash,
+        evidence_hash: payload.claim.evidence_hash,
+        decision_hash: payload.claim.decision_hash,
+        state_hash: payload.claim.state_hash,
+        integrity_hash: payload.claim.integrity_hash
+      }
+    };
+  } catch {
+    return null;
   }
 }
 
