@@ -197,6 +197,72 @@ h1 {
   gap: 10px;
 }
 
+.queue-list-wrap {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.queue-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.queue-item {
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  color: var(--graphite);
+  text-align: left;
+  cursor: pointer;
+}
+
+.queue-item.selected {
+  border-color: #95d4ce;
+  background: var(--teal-soft);
+}
+
+.queue-item.blocked {
+  border-color: #efb4ad;
+}
+
+.queue-item strong,
+.queue-item small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.queue-item strong {
+  font-size: 12px;
+}
+
+.queue-item small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.queue-item em {
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: #edf2f4;
+  color: var(--graphite);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
 .state-item {
   display: grid;
   grid-template-columns: 26px 1fr;
@@ -314,6 +380,51 @@ h1 {
   color: var(--red);
 }
 
+.ops-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ops-strip div {
+  min-height: 72px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+}
+
+.ops-strip span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ops-strip strong {
+  display: block;
+  margin-top: 9px;
+  color: var(--graphite);
+  font-size: 18px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.risk-low {
+  color: var(--green) !important;
+}
+
+.risk-med {
+  color: var(--amber) !important;
+}
+
+.risk-high {
+  color: var(--red) !important;
+}
+
 .claim-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -344,14 +455,66 @@ h1 {
 
 .gate-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
   gap: 18px;
-  align-items: center;
+  align-items: start;
   margin-top: 14px;
   padding: 16px;
   border: 1px solid #b8ddd8;
   border-radius: 8px;
   background: linear-gradient(135deg, #f7fffe, #edf8f6);
+}
+
+.payment-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.75fr);
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+}
+
+.payment-panel h3 {
+  margin-top: 7px;
+  font-size: 19px;
+  line-height: 1.15;
+}
+
+.payment-panel p {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.payment-checks {
+  display: grid;
+  gap: 7px;
+}
+
+.payment-checks span {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.payment-checks .ok {
+  border: 1px solid #9dd5bd;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.payment-checks .hold {
+  border: 1px solid #f1cf90;
+  background: var(--amber-soft);
+  color: var(--amber);
 }
 
 .gate-copy h3 {
@@ -373,7 +536,7 @@ h1 {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .primary-button,
@@ -473,7 +636,7 @@ h1 {
 
 .evidence-row {
   display: grid;
-  grid-template-columns: 1fr minmax(90px, 0.6fr);
+  grid-template-columns: 1fr minmax(116px, 0.62fr);
   gap: 12px;
   align-items: center;
   min-height: 48px;
@@ -495,6 +658,40 @@ h1 {
   margin-top: 4px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.evidence-proof {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  min-width: 0;
+}
+
+.evidence-proof em {
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: #edf2f4;
+  color: var(--graphite);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.evidence-proof .verified {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.evidence-proof .missing,
+.evidence-proof .review {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.evidence-proof .failed {
+  background: var(--red-soft);
+  color: var(--red);
 }
 
 .policy-box dl {
@@ -595,6 +792,55 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-strong);
+}
+
+.proof-history {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+}
+
+.proof-history-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.proof-history-item {
+  display: grid;
+  gap: 7px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.proof-history-item:last-child {
+  border-bottom: 0;
+}
+
+.proof-history-item div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.proof-history-item strong {
+  color: var(--graphite);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.proof-history-item span,
+.proof-history-item time {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 680;
+}
+
+.reviewer-actions {
+  margin-top: 12px;
 }
 
 .mcp-history-list {
@@ -717,6 +963,10 @@ h1 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .ops-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .audit-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -730,6 +980,7 @@ h1 {
   .topbar,
   .workspace,
   .gate-card,
+  .payment-panel,
   .split {
     grid-template-columns: 1fr;
   }
@@ -754,9 +1005,18 @@ h1 {
   }
 
   .claim-grid,
+  .ops-strip,
   .hash-list,
   .audit-list {
     grid-template-columns: 1fr;
+  }
+
+  .evidence-row {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-proof {
+    justify-items: start;
   }
 
   .claim-header {

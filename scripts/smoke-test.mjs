@@ -40,7 +40,11 @@ async function rpc(method, params = {}) {
 
 const home = await fetch(baseUrl);
 assert(home.ok, "home page loads");
-assert((await home.text()).includes("AutoChain Claim Desk"), "home page includes demo title");
+const homeText = await home.text();
+assert(homeText.includes("AutoChain Claim Desk"), "home page includes demo title");
+assert(homeText.includes("Claim queue"), "home page includes claim queue");
+assert(homeText.includes("Payment control"), "home page includes payment controls");
+assert(homeText.includes("Proof history"), "home page includes proof history");
 
 const status = await request("/api/dual/status");
 assert(status.response.ok, "status endpoint returns 200");

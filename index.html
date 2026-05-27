@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AutoChain Claim Desk</title>
-    <link rel="stylesheet" href="./styles.css?v=20260527-mcp-harness" />
+    <link rel="stylesheet" href="./styles.css?v=20260528-operator-console" />
   </head>
   <body>
     <div class="app-shell">
@@ -32,6 +32,13 @@
             <strong id="stateLabel">Claimed</strong>
           </div>
           <ol class="state-list" id="stateList"></ol>
+          <div class="queue-list-wrap">
+            <div class="table-header">
+              <span>Claim queue</span>
+              <strong id="queueCount">0</strong>
+            </div>
+            <div class="queue-list" id="claimQueueList"></div>
+          </div>
           <div class="rail-footer">
             <span>Template</span>
             <code>io.dual.autochain_claim.demo.v1</code>
@@ -45,6 +52,25 @@
               <h2 id="claimTitle">AC-OEM-2026-0007</h2>
             </div>
             <div class="claim-result" id="claimResult">Ready</div>
+          </div>
+
+          <div class="ops-strip">
+            <div>
+              <span>Queue position</span>
+              <strong id="queuePosition">1 of 1</strong>
+            </div>
+            <div>
+              <span>Risk score</span>
+              <strong id="riskScore">12</strong>
+            </div>
+            <div>
+              <span>Evidence</span>
+              <strong id="evidenceScore">100%</strong>
+            </div>
+            <div>
+              <span>Exposure</span>
+              <strong id="exposureValue">$1,189</strong>
+            </div>
           </div>
 
           <div class="claim-grid">
@@ -89,7 +115,20 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                 Block test
               </button>
+              <button class="secondary-button" id="replayProofButton" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 5v5h5"/></svg>
+                Replay proof
+              </button>
             </div>
+          </div>
+
+          <div class="payment-panel">
+            <div>
+              <span class="section-label">Payment control</span>
+              <h3 id="paymentStatus">Locked until approval</h3>
+              <p id="paymentDescription">Payment release requires an approved claim and a complete evidence pack.</p>
+            </div>
+            <div class="payment-checks" id="paymentChecks"></div>
           </div>
 
           <div class="split">
@@ -99,6 +138,10 @@
                 <strong id="evidenceCount">4 anchors</strong>
               </div>
               <div id="evidenceRows" class="rows"></div>
+              <button class="secondary-button full-width" id="attachEvidenceButton" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                Attach missing evidence
+              </button>
             </div>
             <div class="policy-box">
               <div class="table-header">
@@ -136,6 +179,23 @@
             </div>
             <div class="mcp-history-list" id="mcpHistoryList"></div>
           </div>
+          <div class="proof-history">
+            <div class="table-header">
+              <span>Proof history</span>
+              <strong id="proofHistoryCount">0</strong>
+            </div>
+            <div class="proof-history-list" id="proofHistoryList"></div>
+          </div>
+          <div class="reviewer-actions">
+            <button class="secondary-button full-width" id="copyBriefButton" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h10v12H8zM6 16H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+              Copy reviewer brief
+            </button>
+            <button class="secondary-button full-width" id="exportProofButton" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+              Export proof packet
+            </button>
+          </div>
           <button class="secondary-button full-width" id="resetButton" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
             Reset demo
@@ -151,6 +211,6 @@
         <div class="audit-list" id="auditList"></div>
       </section>
     </div>
-    <script type="module" src="./client.js?v=20260527-mcp-harness"></script>
+    <script type="module" src="./client.js?v=20260528-operator-console"></script>
   </body>
 </html>

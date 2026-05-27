@@ -12,6 +12,8 @@ The demo shows an OEM warranty administrator validating one dealer claim for a B
 - safe public read/evaluate API endpoints with `publicWrites=false`;
 - live DUAL readback from the canonical claim object;
 - operator-gated sync/mint endpoints and MCP write tools that execute event-bus writes only when live-write env and `DEMO_OPERATOR_TOKEN` are configured.
+- reviewer-grade claim queue with SLA, priority, risk, evidence completeness, and exposure summaries;
+- evidence review controls, payment-release readiness checks, replayable proof checkpoints, reviewer brief copy, and proof-packet export.
 
 Production target:
 
