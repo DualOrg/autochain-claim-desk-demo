@@ -19,6 +19,8 @@
     { "source": "/api/claims/evaluate", "destination": "/api/claims/evaluate.js" },
     { "source": "/api/claims/sync", "destination": "/api/claims/sync.js" },
     { "source": "/api/claims/mint", "destination": "/api/claims/mint.js" },
+    { "source": "/api/mcp", "destination": "/api/mcp.js" },
+    { "source": "/mcp", "destination": "/api/mcp.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

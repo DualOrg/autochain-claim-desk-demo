@@ -7,6 +7,7 @@ import currentHandler from "./api/claims/current.js";
 import evaluateHandler from "./api/claims/evaluate.js";
 import syncHandler from "./api/claims/sync.js";
 import mintHandler from "./api/claims/mint.js";
+import mcpHandler from "./api/mcp.js";
 import { readCurrentObject, readiness } from "./api/_dual.js";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
@@ -20,7 +21,9 @@ const apiRoutes = new Map([
   ["/api/claims/current", currentHandler],
   ["/api/claims/evaluate", evaluateHandler],
   ["/api/claims/sync", syncHandler],
-  ["/api/claims/mint", mintHandler]
+  ["/api/claims/mint", mintHandler],
+  ["/api/mcp", mcpHandler],
+  ["/mcp", mcpHandler]
 ]);
 
 const mimeTypes = {

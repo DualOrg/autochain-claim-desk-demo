@@ -11,7 +11,7 @@ The demo shows an OEM warranty administrator validating one dealer claim for a B
 - blocked duplicate-claim path;
 - safe public read/evaluate API endpoints with `publicWrites=false`;
 - live DUAL readback from the canonical claim object;
-- operator-gated sync/mint endpoints that execute event-bus writes only when live-write env and `DEMO_OPERATOR_TOKEN` are configured.
+- operator-gated sync/mint endpoints and MCP write tools that execute event-bus writes only when live-write env and `DEMO_OPERATOR_TOKEN` are configured.
 
 Production target:
 
@@ -51,6 +51,29 @@ Operator-gated live endpoints:
 - `POST /api/claims/mint`
 
 The public app does not write to DUAL. The sync/mint endpoints reject missing or wrong operator tokens, require `DUAL_WRITE_MODE=event_bus`, require a positive IanTest org balance, and keep the DUAL API key server-side.
+
+## MCP Surface
+
+MCP JSON-RPC endpoint:
+
+- `POST /mcp`
+- `POST /api/mcp`
+
+Public read/evaluate tools:
+
+- `autochain_dual_get_status`
+- `autochain_dual_get_claim`
+- `autochain_dual_evaluate_gate`
+- `autochain_dual_prepare_sync_payload`
+- `autochain_dual_prepare_mint_payload`
+
+Operator-gated live write tools:
+
+- `autochain_dual_sync_claim`
+- `autochain_dual_advance_gate`
+- `autochain_dual_mint_claim`
+
+Write tools require `operator_token` in the tool arguments or a bearer/operator header matching `DEMO_OPERATOR_TOKEN`. They still require `DUAL_WRITE_MODE=event_bus`, server-side `DUAL_API_KEY`, configured template/object ids as needed, and a positive IanTest org balance. The MCP landing and read tools are public; they never return the DUAL API key or the expected operator token.
 
 ## DUAL Object Model
 

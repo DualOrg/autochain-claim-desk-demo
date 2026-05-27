@@ -588,11 +588,15 @@ export function requireMethod(req, res, method) {
 }
 
 export function validateOperator(req) {
-  const expected = process.env.DEMO_OPERATOR_TOKEN || "";
   const supplied = req.headers?.["x-demo-operator-token"] || req.headers?.["X-Demo-Operator-Token"] || req.headers?.get?.("x-demo-operator-token") || "";
   const auth = req.headers?.authorization || req.headers?.Authorization || req.headers?.get?.("authorization") || "";
   const bearer = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "";
-  return Boolean(expected && (supplied === expected || bearer === expected));
+  return validateOperatorTokenValue(supplied) || validateOperatorTokenValue(bearer);
+}
+
+export function validateOperatorTokenValue(value) {
+  const expected = process.env.DEMO_OPERATOR_TOKEN || "";
+  return Boolean(expected && value && value === expected);
 }
 
 export function requireOperator(req) {

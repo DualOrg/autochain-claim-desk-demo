@@ -20,6 +20,24 @@ async function request(path, options = {}) {
   return { response, body };
 }
 
+let rpcId = 1;
+
+async function rpc(method, params = {}) {
+  const result = await request("/mcp", {
+    method: "POST",
+    body: {
+      jsonrpc: "2.0",
+      id: rpcId++,
+      method,
+      params
+    }
+  });
+  assert(result.response.ok, `MCP ${method} request returns HTTP 200`);
+  assert(result.body.jsonrpc === "2.0", `MCP ${method} returns JSON-RPC envelope`);
+  assert(!result.body.error, `MCP ${method} does not return JSON-RPC error`);
+  return result.body.result;
+}
+
 const home = await fetch(baseUrl);
 assert(home.ok, "home page loads");
 assert((await home.text()).includes("AutoChain Claim Desk"), "home page includes demo title");
@@ -40,6 +58,44 @@ const expectedNextGate = {
   Approved: "paid"
 }[current.body.properties?.state];
 assert(current.body.nextGate?.id === expectedNextGate || (!expectedNextGate && !current.body.nextGate), "current claim reports the next gate for its state");
+
+const mcpLanding = await request("/mcp");
+assert(mcpLanding.response.ok, "MCP landing endpoint returns 200");
+assert(mcpLanding.body.safety?.publicWrites === false, "MCP landing reports no public writes");
+assert(mcpLanding.body.safety?.writeTools === "operator_gated", "MCP landing exposes operator-gated write tools");
+
+const mcpInit = await rpc("initialize");
+assert(mcpInit.serverInfo?.name === "dual-autochain-claim-desk", "MCP initialize returns AutoChain server info");
+assert(mcpInit.safety?.writeTools === "operator_gated", "MCP initialize reports operator-gated writes");
+
+const mcpTools = await rpc("tools/list");
+const mcpToolNames = new Set((mcpTools.tools || []).map((tool) => tool.name));
+assert(mcpToolNames.has("autochain_dual_get_claim"), "MCP lists read claim tool");
+assert(mcpToolNames.has("autochain_dual_sync_claim"), "MCP lists write sync tool");
+assert(mcpToolNames.has("autochain_dual_advance_gate"), "MCP lists write advance tool");
+
+const mcpStatus = await rpc("tools/call", {
+  name: "autochain_dual_get_status",
+  arguments: {}
+});
+assert(mcpStatus.structuredContent?.safety?.publicWrites === false, "MCP status tool reports no public writes");
+assert(!("apiKey" in (mcpStatus.structuredContent?.status || {})), "MCP status tool does not expose API key");
+
+const mcpClaim = await rpc("tools/call", {
+  name: "autochain_dual_get_claim",
+  arguments: {}
+});
+assert(mcpClaim.structuredContent?.current?.properties?.claim_id === "AC-OEM-2026-0007", "MCP claim tool returns canonical claim");
+
+const rejectedMcpSync = await rpc("tools/call", {
+  name: "autochain_dual_sync_claim",
+  arguments: {
+    operator_token: "wrong",
+    claim: current.body.properties
+  }
+});
+assert(rejectedMcpSync.structuredContent?.ok === false, "MCP sync tool rejects wrong operator token");
+assert(rejectedMcpSync.structuredContent?.publicWrites === false, "MCP sync rejection keeps publicWrites false");
 
 const baselineClaim = {
   ...current.body.properties,
