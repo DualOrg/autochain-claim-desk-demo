@@ -98,7 +98,8 @@ const initialState = {
       detail: "VIN + part serial can only be reimbursed once across the OEM network.",
       at: "09:11:03"
     }
-  ]
+  ],
+  mcpHistory: []
 };
 
 let appState = loadState();
@@ -119,7 +120,8 @@ function loadState() {
       ...parsed,
       claim: { ...clone(initialState.claim), ...(parsed.claim || {}) },
       proof: { ...clone(initialState.proof), ...(parsed.proof || {}) },
-      audit: Array.isArray(parsed.audit) ? parsed.audit : clone(initialState.audit)
+      audit: Array.isArray(parsed.audit) ? parsed.audit : clone(initialState.audit),
+      mcpHistory: Array.isArray(parsed.mcpHistory) ? parsed.mcpHistory : []
     };
   } catch {
     return clone(initialState);
@@ -144,7 +146,8 @@ function bootState() {
         decision_hash: payload.claim.decision_hash,
         state_hash: payload.claim.state_hash,
         integrity_hash: payload.claim.integrity_hash
-      }
+      },
+      mcpHistory: deriveMcpHistory(payload.claim, [])
     };
   } catch {
     return null;
@@ -259,6 +262,7 @@ function render() {
   renderHashes();
   renderAudit();
   renderReadiness();
+  renderMcpHistory();
 
   $("verifyButton").disabled = claim.state === "Paid";
   $("verifyButtonLabel").textContent = claim.state === "Paid" ? "Claim complete" : "Verify next gate";
@@ -356,6 +360,30 @@ function renderReadiness() {
   $("dualStatusChip").textContent = status.readbackReady ? "DUAL readback ready" : "Local proof";
 }
 
+function renderMcpHistory() {
+  const history = Array.isArray(appState.mcpHistory) ? appState.mcpHistory : [];
+  $("mcpHistoryCount").textContent = String(history.length);
+  if (!history.length) {
+    $("mcpHistoryList").innerHTML = `
+      <div class="mcp-history-empty">
+        <span>No MCP writes observed in this browser session.</span>
+      </div>
+    `;
+    return;
+  }
+  $("mcpHistoryList").innerHTML = history.slice(0, 5).map((entry) => `
+    <article class="mcp-history-item">
+      <div>
+        <strong>${entry.tool}</strong>
+        <span>${entry.state} / ${entry.nextGate || "complete"}</span>
+      </div>
+      <p>${entry.reason}</p>
+      <code>${shortHash(entry.decisionHash || entry.stateHash || "pending")}</code>
+      <time>${entry.at}</time>
+    </article>
+  `).join("");
+}
+
 async function refreshStatus() {
   const response = await fetch("/api/dual/status", { headers: { accept: "application/json" } });
   appState.dualStatus = await response.json();
@@ -393,8 +421,36 @@ async function refreshCurrentClaim() {
     state_hash: properties.state_hash,
     integrity_hash: properties.integrity_hash
   };
+  appState.mcpHistory = deriveMcpHistory(properties, appState.mcpHistory);
   saveState();
   render();
+}
+
+function deriveMcpHistory(claim = {}, existing = []) {
+  const reason = String(claim.last_decision_reason || "");
+  if (!reason.toLowerCase().includes("mcp")) return existing;
+  const key = `${claim.updated_at || ""}|${claim.state_hash || ""}|${claim.last_gate_id || ""}|${reason}`;
+  if (existing.some((entry) => entry.key === key)) return existing;
+  const entry = {
+    key,
+    tool: reason.toLowerCase().includes("advance") ? "autochain_dual_advance_gate" : "autochain_dual_sync_claim",
+    state: stateLabels[claim.state] || claim.state || "Unknown",
+    nextGate: nextGateForClaim(claim)?.id || null,
+    reason,
+    decisionHash: claim.decision_hash || "",
+    stateHash: claim.state_hash || "",
+    at: claim.updated_at ? new Date(claim.updated_at).toLocaleString("en-AU") : nowTime()
+  };
+  return [entry, ...existing].slice(0, 5);
+}
+
+function nextGateForClaim(claim = {}) {
+  const state = claim.state || appState.claim.state;
+  if (state === "Claimed") return { id: "part_verified" };
+  if (state === "Part_Verified") return { id: "coverage_checked" };
+  if (state === "Coverage_Checked") return { id: "approved" };
+  if (state === "Approved") return { id: "paid" };
+  return null;
 }
 
 async function verifyNextGate() {

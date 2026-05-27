@@ -75,6 +75,21 @@ Operator-gated live write tools:
 
 Write tools require `operator_token` in the tool arguments or a bearer/operator header matching `DEMO_OPERATOR_TOKEN`. They still require `DUAL_WRITE_MODE=event_bus`, server-side `DUAL_API_KEY`, configured template/object ids as needed, and a positive IanTest org balance. The MCP landing and read tools are public; they never return the DUAL API key or the expected operator token.
 
+Agent harness:
+
+```text
+npm run agent:harness
+```
+
+Operator-gated harness modes:
+
+```text
+AUTOCHAIN_OPERATOR_TOKEN=[REDACTED] AUTOCHAIN_WRITE_ACTION=sync npm run agent:harness
+AUTOCHAIN_OPERATOR_TOKEN=[REDACTED] AUTOCHAIN_WRITE_ACTION=advance npm run agent:harness
+```
+
+See `docs/autochain-mcp-runbook.md` for the read-only, sync, advance, and controlled mint boundaries.
+
 ## DUAL Object Model
 
 Template:

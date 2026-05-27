@@ -402,7 +402,11 @@ async function advanceGate(args = {}, request) {
       };
     }
 
-    const claim = applyEvaluationToClaim(patched, evaluation);
+    const advancedClaim = applyEvaluationToClaim(patched, evaluation);
+    const claim = normalizeClaimProperties({
+      ...advancedClaim,
+      last_decision_reason: `${advancedClaim.last_decision_reason} MCP advance gate executed.`
+    });
     const metadata = semanticMetadata("autochain_claim_gate_advanced", claim, { tool: "autochain_dual_advance_gate", ...(args.audit || {}) });
     const balance = await requirePositiveBalance(config);
     const { result, payloadStyle } = await executeEventBusWithFallback(

@@ -589,6 +589,66 @@ h1 {
   line-height: 1.35;
 }
 
+.mcp-history {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+}
+
+.mcp-history-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.mcp-history-empty {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.mcp-history-item {
+  display: grid;
+  gap: 7px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.mcp-history-item:last-child {
+  border-bottom: 0;
+}
+
+.mcp-history-item div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mcp-history-item strong {
+  color: var(--graphite);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.mcp-history-item span,
+.mcp-history-item time {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 680;
+}
+
+.mcp-history-item p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .full-width {
   width: 100%;
   margin-top: 12px;
