@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/dual/status", "destination": "/api/dual/status.js" },
+    { "source": "/api/claims/current", "destination": "/api/claims/current.js" },
+    { "source": "/api/claims/evaluate", "destination": "/api/claims/evaluate.js" },
+    { "source": "/api/claims/sync", "destination": "/api/claims/sync.js" },
+    { "source": "/api/claims/mint", "destination": "/api/claims/mint.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

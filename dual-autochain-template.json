@@ -1,0 +1,30 @@
+{
+  "name": "io.dual.autochain_claim.demo.v1",
+  "description": "AutoChain demo template for OEM warranty claim validation across a dealer network.",
+  "type": "object",
+  "properties": {
+    "claim_id": { "type": "string", "description": "Warranty claim identifier." },
+    "vin": { "type": "string", "description": "Vehicle identification number." },
+    "dealer_id": { "type": "string", "description": "Dealer network identifier." },
+    "dealer_name": { "type": "string", "description": "Dealer submitting the warranty claim." },
+    "oem": { "type": "string", "description": "OEM or tier-1 supplier responsible for signature verification." },
+    "part_serial": { "type": "string", "description": "OEM-signed part serial number." },
+    "part_category": { "type": "string", "description": "Controlled warranty part category." },
+    "claim_amount_usd": { "type": "number", "description": "Dealer-submitted reimbursement amount." },
+    "approved_amount_usd": { "type": "number", "description": "Computed reimbursable amount after policy checks." },
+    "state": { "type": "string", "description": "AutoChain claim state." },
+    "serial_status": { "type": "string", "description": "matched, tampered, duplicate, recalled, or unknown." },
+    "oem_signature_valid": { "type": "boolean", "description": "Whether the serial signature validates against the OEM registry." },
+    "dealer_authorized": { "type": "boolean", "description": "Whether the dealer is currently authorized for this OEM network." },
+    "coverage_active": { "type": "boolean", "description": "Whether warranty date and mileage terms are in force." },
+    "duplicate_claim": { "type": "boolean", "description": "Whether the part/VIN pair was previously reimbursed." },
+    "policy_hash": { "type": "string", "description": "Hash of active warranty validation policy." },
+    "serial_hash": { "type": "string", "description": "Hash of VIN, part serial, OEM, and part category." },
+    "evidence_hash": { "type": "string", "description": "Hash of submitted evidence references." },
+    "decision_hash": { "type": "string", "description": "Hash of the latest evaluator decision." },
+    "state_hash": { "type": "string", "description": "Hash of current claim state." },
+    "last_decision_result": { "type": "string", "description": "Latest evaluator result." },
+    "last_decision_reason": { "type": "string", "description": "Latest evaluator reason." },
+    "updated_at": { "type": "string", "description": "ISO timestamp for the latest local or DUAL-backed update." }
+  }
+}

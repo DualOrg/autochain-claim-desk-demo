@@ -1,0 +1,24 @@
+{
+  "name": "dual-autochain-claim-desk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DUAL AutoChain warranty claim validation demo",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check client.js && node --check server.mjs && node --check api/_dual.js && node --check api/dual/status.js && node --check api/claims/current.js && node --check api/claims/evaluate.js && node --check api/claims/sync.js && node --check api/claims/mint.js && node --check scripts/smoke-test.mjs && node --check scripts/setup-live-dual.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "setup:dual-live": "node scripts/setup-live-dual.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DualOrg/autochain-claim-desk-demo.git"
+  },
+  "homepage": "https://autochain-claim-desk.vercel.app",
+  "bugs": {
+    "url": "https://github.com/DualOrg/autochain-claim-desk-demo/issues"
+  },
+  "license": "UNLICENSED"
+}
