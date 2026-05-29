@@ -1,17 +1,17 @@
 :root {
   color-scheme: light;
-  --bg: #eef2f3;
+  --bg: #f2f3f0;
   --surface: #fbfcfc;
   --surface-strong: #ffffff;
-  --ink: #111820;
-  --muted: #5d6975;
-  --line: #d8e0e3;
-  --line-strong: #b8c5ca;
-  --teal: #0f8f83;
-  --teal-strong: #0a625b;
-  --teal-soft: #dff5f2;
-  --amber: #b7791f;
-  --amber-soft: #fff2d8;
+  --ink: #171b1f;
+  --muted: #606a71;
+  --line: #d9dedc;
+  --line-strong: #bfc8c4;
+  --teal: #28766b;
+  --teal-strong: #184f49;
+  --teal-soft: #e2f0ed;
+  --amber: #c1781f;
+  --amber-soft: #fff0d8;
   --red: #b42318;
   --red-soft: #fff0ee;
   --green: #13795b;
@@ -30,7 +30,9 @@ body {
   margin: 0;
   min-width: 320px;
   color: var(--ink);
-  background: #f4f7f8;
+  background:
+    linear-gradient(180deg, #ffffff 0, var(--bg) 430px),
+    repeating-linear-gradient(135deg, rgba(193, 120, 31, 0.07) 0, rgba(193, 120, 31, 0.07) 1px, transparent 1px, transparent 18px);
 }
 
 button {
@@ -59,6 +61,7 @@ code {
   min-height: 62px;
   padding: 8px 22px;
   border-bottom: 1px solid var(--line);
+  border-top: 4px solid var(--amber);
   background: #ffffff;
   position: sticky;
   top: 0;
@@ -214,9 +217,9 @@ h1 {
   min-height: 42px;
   margin-top: 12px;
   padding: 9px 14px;
-  border: 1px solid rgba(15, 143, 131, 0.22);
+  border: 1px solid rgba(193, 120, 31, 0.3);
   border-radius: 8px;
-  background: #eef8fa;
+  background: var(--amber-soft);
 }
 
 .demo-disclosure strong {
@@ -240,8 +243,9 @@ h1 {
   margin-top: 10px;
   padding: 14px;
   border: 1px solid var(--line);
+  border-left: 4px solid var(--amber);
   border-radius: 8px;
-  background: #ffffff;
+  background: #fffdf8;
 }
 
 .verifier-banner {
@@ -413,7 +417,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: rgba(251, 252, 252, 0.96);
-  box-shadow: 0 1px 2px rgba(21, 31, 40, 0.03);
+  box-shadow: 0 1px 2px rgba(21, 31, 40, 0.03), 0 12px 30px rgba(33, 37, 41, 0.035);
 }
 
 .state-rail,
