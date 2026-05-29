@@ -10,6 +10,7 @@ import {
   mintPayloadAttempts,
   nextGateForState,
   normalizeClaimProperties,
+  publicVerifierEnvelope,
   readBody,
   readCurrentObject,
   readiness,
@@ -98,6 +99,37 @@ const tools = [
       audit: auditSchema
     }
   }),
+  tool("autochain_dual_run_claim_proof", "Run the read-only AutoChain claim proof and return vehicle identity, records, trust score, proof hashes, and verifier status.", {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      claim: claimSchema,
+      properties: claimSchema
+    }
+  }),
+  tool("autochain_dual_get_public_verifier_page", "Return the shareable public verifier route and proof envelope for a claim. This is read-only and never writes to DUAL.", {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      claim: claimSchema,
+      properties: claimSchema
+    }
+  }),
+  tool("autochain_dual_red_team_claim", "Evaluate common AutoChain blocked-claim scenarios without writing to DUAL.", {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      scenario: {
+        type: "string",
+        enum: ["duplicate_claim", "invalid_serial", "mileage_over_limit", "unauthorized_dealer", "payment_before_approval"]
+      }
+    }
+  }),
+  tool("autochain_dual_generate_reviewer_handoff", "Generate a reviewer handoff pack with route, claim, verifier, API/MCP checks, and safety boundary.", {
+    type: "object",
+    additionalProperties: false,
+    properties: {}
+  }),
   tool("autochain_dual_sync_claim", "Operator-gated live DUAL write: sync the supplied or current claim to the configured claim object.", {
     type: "object",
     additionalProperties: false,
@@ -151,6 +183,7 @@ const resources = [
   resource("autochain://claim", "Current AutoChain claim", "Canonical claim object read from DUAL when configured."),
   resource("autochain://policy", "Warranty policy", "AutoChain warranty gate rules used by the evaluator."),
   resource("autochain://template", "Claim template", "MCP-facing summary of the AutoChain DUAL object schema."),
+  resource("autochain://public-verifier", "Public verifier", "Shareable AutoChain claim verifier envelope and route."),
   resource("autochain://safety", "MCP safety", "Read/write boundary and operator-gated write rules.")
 ];
 
@@ -287,6 +320,14 @@ async function callTool(name, args, request) {
       return prepareSyncPayload(args);
     case "autochain_dual_prepare_mint_payload":
       return prepareMintPayload(args);
+    case "autochain_dual_run_claim_proof":
+      return runClaimProof(args);
+    case "autochain_dual_get_public_verifier_page":
+      return getPublicVerifierPage(args);
+    case "autochain_dual_red_team_claim":
+      return redTeamClaim(args);
+    case "autochain_dual_generate_reviewer_handoff":
+      return reviewerHandoff();
     case "autochain_dual_sync_claim":
       return syncClaim(args, request);
     case "autochain_dual_advance_gate":
@@ -348,6 +389,95 @@ async function prepareMintPayload(args = {}) {
     metadata,
     claim: claimTemplateProperties(claim),
     payloadAttempts: mintPayloadAttempts(config.templateId || templateName, claim, metadata)
+  };
+}
+
+async function runClaimProof(args = {}) {
+  const resolved = await resolveClaim(args);
+  const claim = claimTemplateProperties(resolved.claim);
+  const gate = nextGateForState(claim.state);
+  const evaluation = gate ? evaluateClaimGate(claim, gate) : null;
+  const verifier = publicVerifierEnvelope(claim, readiness());
+  return {
+    ok: true,
+    source: resolved.source,
+    publicWrites: false,
+    claim,
+    nextGate: gate,
+    evaluation,
+    verifier,
+    safety: safetyState()
+  };
+}
+
+async function getPublicVerifierPage(args = {}) {
+  const proof = await runClaimProof(args);
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "https://autochain-eight.vercel.app";
+  return {
+    ok: true,
+    publicWrites: false,
+    route: `/proof/${encodeURIComponent(proof.claim.claim_id)}`,
+    url: `${baseUrl}/proof/${encodeURIComponent(proof.claim.claim_id)}?content_hash=${encodeURIComponent(proof.verifier.verifier.content_hash.slice(2, 14))}`,
+    verifier: proof.verifier,
+    safety: safetyState()
+  };
+}
+
+async function redTeamClaim(args = {}) {
+  const resolved = await resolveClaim({ fallback_to_seed: true });
+  const scenario = args.scenario || "duplicate_claim";
+  const patchByScenario = {
+    duplicate_claim: { duplicate_claim: true, serial_status: "duplicate", state: "Part_Verified" },
+    invalid_serial: { oem_signature_valid: false, serial_status: "mismatch", state: "Claimed" },
+    mileage_over_limit: { odometer_km: 145000, state: "Part_Verified" },
+    unauthorized_dealer: { dealer_authorized: false, state: "Part_Verified" },
+    payment_before_approval: { state: "Coverage_Checked" }
+  };
+  const claim = normalizeClaimProperties({ ...resolved.claim, ...(patchByScenario[scenario] || patchByScenario.duplicate_claim) });
+  const gate = scenario === "payment_before_approval" ? { id: "paid" } : {};
+  const evaluation = evaluateClaimGate(claim, gate);
+  return {
+    ok: true,
+    scenario,
+    publicWrites: false,
+    evaluation,
+    claim: applyEvaluationToClaim(claim, evaluation),
+    safety: safetyState()
+  };
+}
+
+async function reviewerHandoff() {
+  const proof = await runClaimProof({});
+  const verifier = await getPublicVerifierPage({});
+  return {
+    ok: true,
+    publicWrites: false,
+    summary: {
+      app: "AutoChain Claim Desk",
+      claim_id: proof.claim.claim_id,
+      state: proof.claim.state,
+      next_gate: proof.nextGate?.id || "complete",
+      verifier_url: verifier.url,
+      write_boundary: "public read/evaluate only; writes are operator-gated"
+    },
+    api_checks: [
+      "GET /api/dual/status",
+      "GET /api/claims/current",
+      "GET /api/proof/public",
+      "POST /api/claims/evaluate",
+      "POST /mcp"
+    ],
+    mcp_checks: [
+      "autochain_dual_get_status",
+      "autochain_dual_get_claim",
+      "autochain_dual_run_claim_proof",
+      "autochain_dual_get_public_verifier_page",
+      "autochain_dual_red_team_claim"
+    ],
+    proof,
+    safety: safetyState()
   };
 }
 
@@ -635,6 +765,9 @@ async function readResource(uri) {
       version: templateVersion,
       fields: Object.keys(claimTemplateProperties(seedClaimProperties()))
     });
+  }
+  if (uri === "autochain://public-verifier") {
+    return resourceContent(uri, await getPublicVerifierPage({}));
   }
   if (uri === "autochain://safety") {
     return resourceContent(uri, {

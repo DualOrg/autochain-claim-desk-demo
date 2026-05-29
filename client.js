@@ -400,6 +400,111 @@ function riskScore(claim) {
   return Math.max(0, Math.min(99, score));
 }
 
+function vehicleIdentityFromClaim(claim) {
+  const dvin = `DVIN-${localHash(JSON.stringify({
+    vin: claim.vin,
+    oem: claim.oem,
+    part_serial: claim.part_serial
+  })).slice(2, 14).toUpperCase()}`;
+  return {
+    dvin,
+    vin: claim.vin,
+    vehicle: claim.vehicle,
+    record_scope: "warranty-claim",
+    identity_hash: localHash(`${dvin}:${claim.vin}:${claim.vehicle}:${claim.dealer_id}`),
+    dual_object_id: appState.dualStatus?.objectId || "local-autochain-claim-demo",
+    publicWrites: false
+  };
+}
+
+function vehicleRecordsFromClaim(claim) {
+  const identity = vehicleIdentityFromClaim(claim);
+  return [
+    {
+      type: "identity",
+      label: "Vehicle identity registered",
+      date: claim.warranty_started_at,
+      source: claim.oem,
+      status: "verified",
+      value: identity.dvin,
+      hash: localHash(`${identity.dvin}:${claim.vin}`)
+    },
+    {
+      type: "mileage",
+      label: "Mileage reading captured",
+      date: claim.claim_date,
+      source: claim.dealer_name,
+      status: Number(claim.odometer_km) <= Number(claim.warranty_km_limit) ? "verified" : "review",
+      value: `${Number(claim.odometer_km || 0).toLocaleString()} km`,
+      hash: localHash(`${claim.vin}:${claim.odometer_km}:${claim.claim_date}`)
+    },
+    {
+      type: "maintenance",
+      label: `${claim.part_name} replaced`,
+      date: claim.claim_date,
+      source: claim.dealer_name,
+      status: claim.serial_status === "matched" ? "verified" : "review",
+      value: claim.replacement_serial,
+      hash: localHash(`${claim.part_serial}:${claim.replacement_serial}`)
+    },
+    {
+      type: "claim",
+      label: `Warranty claim ${claim.claim_id}`,
+      date: claim.updated_at || claim.claim_date,
+      source: "AutoChain Claim Desk",
+      status: claim.last_decision_result === "Blocked" ? "blocked" : "verified",
+      value: claim.state,
+      hash: claim.state_hash || appState.proof?.state_hash || localHash(`${claim.claim_id}:${claim.state}`)
+    }
+  ];
+}
+
+function evidenceVaultFromClaim(claim) {
+  return (claim.evidence_refs || []).map((item) => ({
+    ...item,
+    label: labelize(item.type),
+    media_type: item.type === "installation_photo" ? "image-ref" : "document-ref",
+    custody: "hash-only demo reference"
+  }));
+}
+
+function vehicleTrustScoreFromClaim(claim) {
+  const checks = [
+    ["VIN and DUAL identity", Boolean(claim.vin && vehicleIdentityFromClaim(claim).identity_hash), 20],
+    ["OEM serial matched", claim.serial_status === "matched" && Boolean(claim.oem_signature_valid), 20],
+    ["Coverage active", Boolean(claim.coverage_active), 15],
+    ["Mileage in warranty", Number(claim.odometer_km) <= Number(claim.warranty_km_limit), 15],
+    ["Dealer authorized", Boolean(claim.dealer_authorized), 10],
+    ["Duplicate clear", !claim.duplicate_claim && claim.serial_status !== "duplicate", 10],
+    ["Evidence complete", evidenceScore(claim) === 100, 10]
+  ];
+  const score = checks.reduce((sum, [, ok, points]) => sum + (ok ? points : 0), 0);
+  return {
+    score,
+    band: score >= 90 ? "trusted" : score >= 70 ? "review" : "risk",
+    checks: checks.map(([label, ok]) => ({ label, ok }))
+  };
+}
+
+function publicVerifierEnvelope() {
+  const identity = vehicleIdentityFromClaim(appState.claim);
+  const trust = vehicleTrustScoreFromClaim(appState.claim);
+  const proof = proofFromClaim(appState.claim, appState.proof);
+  return {
+    claim_id: appState.claim.claim_id,
+    route: `/proof/${encodeURIComponent(appState.claim.claim_id)}`,
+    status: appState.dualStatus?.readbackReady ? "verified" : "local_unverified",
+    content_hash: localHash(JSON.stringify({
+      claim_id: appState.claim.claim_id,
+      state_hash: proof.state_hash,
+      identity_hash: identity.identity_hash,
+      trust_score: trust.score,
+      evidence_hash: proof.evidence_hash
+    })),
+    publicWrites: false
+  };
+}
+
 function priorityForClaim(claim) {
   const score = riskScore(claim);
   if (score >= 70) return "Critical";
@@ -514,9 +619,71 @@ function render() {
   renderOpsStrip();
   renderPayment();
   renderProofHistory();
+  renderVehicleIntelligence();
+  renderVerifierBanner();
 
   $("verifyButton").disabled = claim.state === "Paid";
   $("verifyButtonLabel").textContent = claim.state === "Paid" ? "Claim complete" : "Verify next gate";
+}
+
+function renderVerifierBanner() {
+  const envelope = publicVerifierEnvelope();
+  const verifierMode = window.location.pathname.startsWith("/proof/");
+  const banner = $("verifierBanner");
+  banner.classList.toggle("verifier-mode", verifierMode);
+  $("verifierStatus").textContent = verifierMode
+    ? `${envelope.claim_id} public verifier`
+    : "Claim verifier ready";
+  $("verifierDescription").textContent = verifierMode
+    ? `Read-only proof page. ${envelope.status}; publicWrites=false; link content hash is shown for reviewer comparison.`
+    : "Shareable verifier route: claim identity, DUAL readback, vehicle records, trust score, and proof hashes with public writes disabled.";
+  $("publicVerifierLink").href = `${envelope.route}?content_hash=${encodeURIComponent(envelope.content_hash.slice(2, 14))}`;
+  $("publicVerifierLink").textContent = verifierMode ? "Refresh proof page" : "Open proof page";
+  $("verifierHash").textContent = shortHash(envelope.content_hash);
+}
+
+function renderVehicleIntelligence() {
+  const claim = appState.claim;
+  const identity = vehicleIdentityFromClaim(claim);
+  const trust = vehicleTrustScoreFromClaim(claim);
+  const records = vehicleRecordsFromClaim(claim);
+  const vault = evidenceVaultFromClaim(claim);
+  $("dvinValue").textContent = identity.dvin;
+  $("identityHashValue").textContent = shortHash(identity.identity_hash);
+  $("recordScopeValue").textContent = identity.record_scope;
+  $("vehicleDualObjectValue").textContent = identity.dual_object_id;
+  $("vehicleTrustScore").textContent = `${trust.score}/100`;
+  $("vehicleTrustBand").textContent = trust.band === "trusted"
+    ? "Trusted vehicle record: identity, mileage, serial, evidence, and duplicate checks are clean."
+    : trust.band === "review"
+      ? "Review vehicle record: useful proof exists, but at least one control needs attention."
+      : "Risk vehicle record: claim should not progress without manual review.";
+  $("vehicleScoreMeter").style.width = `${trust.score}%`;
+  $("vehicleScoreChecks").innerHTML = trust.checks.map((check) => `
+    <span class="${check.ok ? "ok" : ""}">${check.ok ? "OK" : "HOLD"} ${check.label}</span>
+  `).join("");
+  $("vehicleRecordCount").textContent = String(records.length);
+  $("vehicleTimeline").innerHTML = records.map((record) => `
+    <article class="record-item">
+      <div>
+        <strong>${record.label}</strong>
+        <small>${record.source} / ${record.value || record.date}</small>
+        <small>${record.date ? new Date(record.date).toLocaleDateString("en-AU") : "date pending"} / ${shortHash(record.hash)}</small>
+      </div>
+      <em>${record.status}</em>
+    </article>
+  `).join("");
+  $("evidenceVaultCount").textContent = String(vault.length);
+  $("evidenceVaultList").innerHTML = vault.map((item) => `
+    <article class="vault-item">
+      <div>
+        <strong>${item.label}</strong>
+        <small>${item.issuer} / ${item.id}</small>
+        <small>${item.media_type} / ${shortHash(item.hash)}</small>
+      </div>
+      <em>anchored</em>
+    </article>
+  `).join("");
 }
 
 function renderQueue() {
@@ -1089,6 +1256,11 @@ function buildProofPacket() {
       last_decision_reason: appState.claim.last_decision_reason
     },
     next_gate: nextGate().id,
+    public_verifier: publicVerifierEnvelope(),
+    vehicle_identity: vehicleIdentityFromClaim(appState.claim),
+    vehicle_records: vehicleRecordsFromClaim(appState.claim),
+    evidence_vault: evidenceVaultFromClaim(appState.claim),
+    trust_score: vehicleTrustScoreFromClaim(appState.claim),
     risk_score: riskScore(appState.claim),
     evidence_score: evidenceScore(appState.claim),
     proof: proofFromClaim(appState.claim, appState.proof),

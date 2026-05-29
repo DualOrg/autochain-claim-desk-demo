@@ -18,6 +18,7 @@ Point to:
 - `DUAL readback ready` when production readback is configured.
 - `publicWrites=false`.
 - `Synthetic claim, live DUAL proof`.
+- `Vehicle identity`, `Vehicle trust score`, `Vehicle record timeline`, and `Evidence vault`.
 
 ## Current Canonical Claim
 
@@ -48,8 +49,9 @@ If the API returns a different state, use the returned state in the demo. Do not
 3. Click `Reviewer Mode`.
 4. Click `Replay proof`.
 5. Confirm `Proof history` increases.
-6. Click `Export proof`.
-7. Open or inspect the downloaded JSON proof packet if useful.
+6. Confirm the DVIN-style identity, trust score, record timeline, and evidence vault are visible.
+7. Click `Export proof`.
+8. Open or inspect the downloaded JSON proof packet if useful.
 
 Presenter line:
 
@@ -78,6 +80,7 @@ What the proof does:
 - evaluates the next gate read-only;
 - prepares sync and mint payload previews;
 - verifies MCP write tools reject missing/wrong operator credentials;
+- returns DVIN-style identity, vehicle records, evidence vault, trust score, and public verifier data through MCP proof tools;
 - writes JSON and Markdown artifacts under `outputs/`.
 
 What the proof does not do:
@@ -100,10 +103,13 @@ Expected coverage:
 - home page loads;
 - official DUAL logo is present;
 - reviewer disclosure/support content is present;
+- vehicle identity, record timeline, trust score, evidence vault, and public verifier surfaces are present;
+- `/api/proof/public` returns a DVIN-style identity, vehicle records, evidence vault, trust score, and `publicWrites=false`;
 - `/api/dual/status` returns public writes false;
 - `/api/claims/current` returns the canonical claim;
 - MCP initialize and tool listing work;
 - public MCP read tools work;
+- public MCP proof/verifier/red-team tools work;
 - wrong operator token is rejected for sync;
 - claim evaluation works;
 - sync and mint reject wrong operator token.
@@ -120,6 +126,12 @@ Current claim:
 
 ```bash
 curl https://autochain-eight.vercel.app/api/claims/current
+```
+
+Public verifier envelope:
+
+```bash
+curl https://autochain-eight.vercel.app/api/proof/public
 ```
 
 Evaluate the next gate:
@@ -177,6 +189,22 @@ curl -s https://autochain-eight.vercel.app/mcp \
   -d '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"autochain_dual_evaluate_gate","arguments":{}}}'
 ```
 
+Run claim proof:
+
+```bash
+curl -s https://autochain-eight.vercel.app/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"autochain_dual_run_claim_proof","arguments":{}}}'
+```
+
+Get public verifier route:
+
+```bash
+curl -s https://autochain-eight.vercel.app/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"autochain_dual_get_public_verifier_page","arguments":{}}}'
+```
+
 Use `docs/autochain-mcp-runbook.md` for operator-sync and operator-advance modes.
 
 ## Where To Look In The App
@@ -191,11 +219,13 @@ Use the first screen and proof rail.
    - Reviewer context: SLA, priority, risk, exposure.
 4. Claim workflow
    - Canonical claim, state chain, evidence, and payment control.
-5. DUAL readiness rail
+5. Vehicle record layer
+   - DVIN-style identity, vehicle trust score, timeline, and evidence vault.
+6. DUAL readiness rail
    - Runtime, mode, write mode, readback, and public-write status.
-6. Proof history
+7. Proof history
    - Replayable checkpoints and proof hashes.
-7. Demo support
+8. Demo support
    - Runbook and support links.
 
 ## DUAL Console Links

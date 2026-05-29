@@ -4,14 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AutoChain Claim Desk</title>
-    <link rel="stylesheet" href="./styles.css?v=20260529-dual-logo-1" />
+    <link rel="stylesheet" href="/styles.css?v=20260529-vehicle-verifier-2" />
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">
           <a class="brand-logo" href="/" aria-label="DUAL AutoChain">
-            <img src="./assets/dual-logo.svg" alt="DUAL" class="brand-mark" />
+            <img src="/assets/dual-logo.svg" alt="DUAL" class="brand-mark" />
           </a>
           <div class="brand-copy">
             <h1>AutoChain Claim Desk</h1>
@@ -94,6 +94,20 @@
         </div>
       </section>
 
+      <section class="verifier-banner" id="verifierBanner" aria-label="Public verifier">
+        <div>
+          <span>Public verifier</span>
+          <strong id="verifierStatus">Claim verifier ready</strong>
+          <p id="verifierDescription">Shareable verifier route: claim identity, DUAL readback, vehicle records, trust score, and proof hashes with public writes disabled.</p>
+        </div>
+        <div class="verifier-actions">
+          <a class="secondary-link" id="publicVerifierLink" href="/proof/AC-OEM-2026-0007">
+            Open proof page
+          </a>
+          <code id="verifierHash">content hash pending</code>
+        </div>
+      </section>
+
       <main class="workspace">
         <aside class="state-rail panel">
           <div class="panel-title">
@@ -169,6 +183,47 @@
               <span>What is blocked</span>
               <strong>Public payment writes</strong>
               <p>The demo exports proof locally; live writes stay behind the operator token boundary.</p>
+            </article>
+          </div>
+
+          <div class="vehicle-intelligence" aria-label="Vehicle intelligence">
+            <article class="vehicle-identity-card">
+              <div class="table-header">
+                <span>Vehicle identity</span>
+                <strong id="dvinValue">DVIN pending</strong>
+              </div>
+              <p>DVIN-style claim anchor linked to VIN, vehicle, dealer, DUAL object, and identity hash.</p>
+              <dl>
+                <div><dt>Identity hash</dt><dd><code id="identityHashValue">pending</code></dd></div>
+                <div><dt>Record scope</dt><dd id="recordScopeValue">warranty-claim</dd></div>
+                <div><dt>Dual object</dt><dd><code id="vehicleDualObjectValue">local-autochain-claim-demo</code></dd></div>
+              </dl>
+            </article>
+            <article class="trust-score-card">
+              <div class="table-header">
+                <span>Vehicle trust score</span>
+                <strong id="vehicleTrustScore">0</strong>
+              </div>
+              <p id="vehicleTrustBand">Awaiting claim proof.</p>
+              <div class="score-meter" aria-hidden="true"><span id="vehicleScoreMeter"></span></div>
+              <div class="score-checks" id="vehicleScoreChecks"></div>
+            </article>
+          </div>
+
+          <div class="records-vault-grid" aria-label="Vehicle record vault">
+            <article>
+              <div class="table-header">
+                <span>Vehicle record timeline</span>
+                <strong id="vehicleRecordCount">0</strong>
+              </div>
+              <div class="record-timeline" id="vehicleTimeline"></div>
+            </article>
+            <article>
+              <div class="table-header">
+                <span>Evidence vault</span>
+                <strong id="evidenceVaultCount">0</strong>
+              </div>
+              <div class="vault-list" id="evidenceVaultList"></div>
             </article>
           </div>
 
@@ -343,6 +398,6 @@
         <div class="audit-list" id="auditList"></div>
       </section>
     </div>
-    <script type="module" src="./client.js?v=20260529-tradeflow-standard-4"></script>
+    <script type="module" src="/client.js?v=20260529-vehicle-verifier-2"></script>
   </body>
 </html>

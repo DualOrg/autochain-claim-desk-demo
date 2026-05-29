@@ -25,6 +25,9 @@ The production app should preserve these guarantees:
 - public read/evaluate/replay/export only;
 - `publicWrites=false`;
 - DUAL readback when configured;
+- public verifier route `/proof/:claimId`;
+- public proof API `/api/proof/public`;
+- DVIN-style vehicle identity, vehicle record timeline, evidence vault, and trust score;
 - operator-gated writes only when the server has a scoped DUAL key, event-bus mode, and `DEMO_OPERATOR_TOKEN`;
 - no browser-visible DUAL API key or operator token.
 
@@ -91,7 +94,9 @@ Recommended rollout:
 5. Deploy.
 6. Check `GET /api/dual/status`.
 7. Check `GET /api/claims/current`.
-8. Run production smoke:
+8. Check `GET /api/proof/public`.
+9. Open `/proof/AC-OEM-2026-0007`.
+10. Run production smoke:
 
 ```bash
 DEMO_BASE_URL=https://autochain-eight.vercel.app npm run smoke
@@ -136,6 +141,7 @@ Public checks:
 ```bash
 curl https://autochain-eight.vercel.app/api/dual/status
 curl https://autochain-eight.vercel.app/api/claims/current
+curl https://autochain-eight.vercel.app/api/proof/public
 ```
 
 MCP initialize:

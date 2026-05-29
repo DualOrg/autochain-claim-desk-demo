@@ -42,13 +42,23 @@ const home = await fetch(baseUrl);
 assert(home.ok, "home page loads");
 const homeText = await home.text();
 assert(homeText.includes("AutoChain Claim Desk"), "home page includes demo title");
-assert(homeText.includes("./assets/dual-logo.svg"), "home page uses official DUAL logo");
+assert(homeText.includes("/assets/dual-logo.svg"), "home page uses official DUAL logo");
 assert(homeText.includes("Synthetic claim, live DUAL proof"), "home page includes demo disclosure");
 assert(homeText.includes("60-90 second reviewer walkthrough"), "home page includes reviewer walkthrough");
 assert(homeText.includes("Claim queue"), "home page includes claim queue");
 assert(homeText.includes("Payment control"), "home page includes payment controls");
 assert(homeText.includes("Proof history"), "home page includes proof history");
 assert(homeText.includes("Demo support"), "home page includes demo support");
+assert(homeText.includes("Vehicle identity"), "home page includes vehicle identity panel");
+assert(homeText.includes("Vehicle trust score"), "home page includes vehicle trust score");
+assert(homeText.includes("Vehicle record timeline"), "home page includes vehicle record timeline");
+assert(homeText.includes("Evidence vault"), "home page includes evidence vault");
+assert(homeText.includes("Public verifier"), "home page includes public verifier route support");
+
+const proofPage = await fetch(`${baseUrl}/proof/AC-OEM-2026-0007`);
+assert(proofPage.ok, "public proof route loads");
+const proofPageText = await proofPage.text();
+assert(proofPageText.includes("Public verifier"), "public proof route includes verifier shell");
 
 const status = await request("/api/dual/status");
 assert(status.response.ok, "status endpoint returns 200");
@@ -67,6 +77,15 @@ const expectedNextGate = {
 }[current.body.properties?.state];
 assert(current.body.nextGate?.id === expectedNextGate || (!expectedNextGate && !current.body.nextGate), "current claim reports the next gate for its state");
 
+const publicProof = await request("/api/proof/public");
+assert(publicProof.response.ok, "public proof endpoint returns 200");
+assert(publicProof.body.claim?.claim_id === "AC-OEM-2026-0007", "public proof returns canonical claim");
+assert(publicProof.body.vehicle_identity?.dvin?.startsWith("DVIN-"), "public proof returns DVIN-style identity");
+assert(publicProof.body.vehicle_records?.length >= 4, "public proof returns vehicle record timeline");
+assert(publicProof.body.evidence_vault?.length >= 4, "public proof returns evidence vault");
+assert(publicProof.body.trust_score?.score >= 80, "public proof returns vehicle trust score");
+assert(publicProof.body.safety?.publicWrites === false, "public proof keeps publicWrites false");
+
 const mcpLanding = await request("/mcp");
 assert(mcpLanding.response.ok, "MCP landing endpoint returns 200");
 assert(mcpLanding.body.safety?.publicWrites === false, "MCP landing reports no public writes");
@@ -79,6 +98,9 @@ assert(mcpInit.safety?.writeTools === "operator_gated", "MCP initialize reports 
 const mcpTools = await rpc("tools/list");
 const mcpToolNames = new Set((mcpTools.tools || []).map((tool) => tool.name));
 assert(mcpToolNames.has("autochain_dual_get_claim"), "MCP lists read claim tool");
+assert(mcpToolNames.has("autochain_dual_run_claim_proof"), "MCP lists claim proof tool");
+assert(mcpToolNames.has("autochain_dual_get_public_verifier_page"), "MCP lists public verifier tool");
+assert(mcpToolNames.has("autochain_dual_red_team_claim"), "MCP lists red-team claim tool");
 assert(mcpToolNames.has("autochain_dual_sync_claim"), "MCP lists write sync tool");
 assert(mcpToolNames.has("autochain_dual_advance_gate"), "MCP lists write advance tool");
 
@@ -94,6 +116,27 @@ const mcpClaim = await rpc("tools/call", {
   arguments: {}
 });
 assert(mcpClaim.structuredContent?.current?.properties?.claim_id === "AC-OEM-2026-0007", "MCP claim tool returns canonical claim");
+
+const mcpProof = await rpc("tools/call", {
+  name: "autochain_dual_run_claim_proof",
+  arguments: {}
+});
+assert(mcpProof.structuredContent?.verifier?.vehicle_identity?.dvin?.startsWith("DVIN-"), "MCP proof tool returns DVIN-style identity");
+assert(mcpProof.structuredContent?.verifier?.trust_score?.score >= 80, "MCP proof tool returns trust score");
+assert(mcpProof.structuredContent?.publicWrites === false, "MCP proof tool keeps publicWrites false");
+
+const mcpVerifier = await rpc("tools/call", {
+  name: "autochain_dual_get_public_verifier_page",
+  arguments: {}
+});
+assert(mcpVerifier.structuredContent?.route?.startsWith("/proof/"), "MCP verifier tool returns public proof route");
+assert(mcpVerifier.structuredContent?.publicWrites === false, "MCP verifier tool keeps publicWrites false");
+
+const mcpRedTeam = await rpc("tools/call", {
+  name: "autochain_dual_red_team_claim",
+  arguments: { scenario: "duplicate_claim" }
+});
+assert(mcpRedTeam.structuredContent?.evaluation?.result === "Blocked", "MCP red-team tool blocks duplicate claim");
 
 const rejectedMcpSync = await rpc("tools/call", {
   name: "autochain_dual_sync_claim",

@@ -17,6 +17,10 @@ Use this runbook when an agent or operator needs to inspect, evaluate, sync, adv
 | `autochain_dual_evaluate_gate` | Public | Evaluate the next gate without writing. |
 | `autochain_dual_prepare_sync_payload` | Public | Preview a DUAL sync payload. |
 | `autochain_dual_prepare_mint_payload` | Public | Preview a mint payload. |
+| `autochain_dual_run_claim_proof` | Public | Return claim proof, DVIN-style identity, record timeline, evidence vault, trust score, and verifier envelope. |
+| `autochain_dual_get_public_verifier_page` | Public | Return the shareable `/proof/:claimId` route and verifier URL. |
+| `autochain_dual_red_team_claim` | Public | Evaluate blocked-claim scenarios without writing. |
+| `autochain_dual_generate_reviewer_handoff` | Public | Return a reviewer handoff pack with routes, checks, proof, and safety boundary. |
 | `autochain_dual_sync_claim` | Operator-gated | Write the current claim to the canonical DUAL object. |
 | `autochain_dual_advance_gate` | Operator-gated | Evaluate then advance the claim state if allowed. |
 | `autochain_dual_mint_claim` | Operator-gated | Mint a new claim object for controlled demos. |
@@ -48,6 +52,32 @@ npm run proof:chain
 ```
 
 The proof initializes AutoChain MCP, reads the live claim, confirms the standalone demo target `Approved -> paid`, evaluates the next gate read-only, previews sync and mint payloads without executing them, verifies write tools are operator-gated, and writes proof artifacts under `outputs/`.
+
+## Public verifier flow
+
+Use this for CarrChain-style automotive-record inspection without opening a write path.
+
+```text
+curl -s https://autochain-eight.vercel.app/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"autochain_dual_run_claim_proof","arguments":{}}}'
+```
+
+Expected result:
+
+- `vehicle_identity.dvin` starts with `DVIN-`;
+- `vehicle_records` includes identity, mileage, maintenance, and warranty-claim events;
+- `evidence_vault` includes hash-only evidence references;
+- `trust_score.score` is returned with per-check explanations;
+- `publicWrites=false`.
+
+For the shareable page:
+
+```text
+curl -s https://autochain-eight.vercel.app/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"autochain_dual_get_public_verifier_page","arguments":{}}}'
+```
 
 ## Operator sync flow
 

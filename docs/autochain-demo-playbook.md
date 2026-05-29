@@ -30,9 +30,13 @@ The demo is not about real payment execution. It is about claim-state governance
 AutoChain demonstrates a DUAL pattern for high-trust warranty operations:
 
 - A canonical claim object.
+- A DVIN-style vehicle identity anchor.
 - A state machine with explicit gates.
+- A vehicle record timeline and evidence vault.
+- A transparent vehicle trust score.
 - Evidence refs and deterministic proof hashes.
 - Readback from DUAL when configured.
+- A shareable public verifier route.
 - Local proof replay for public reviewers.
 - Operator-gated write tools for controlled state changes.
 - A visible public safety boundary.
@@ -114,10 +118,11 @@ Total: roughly 5-6 minutes.
 3. Read the disclosure: synthetic claim, live DUAL proof.
 4. Point to the canonical claim `AC-OEM-2026-0007`.
 5. Click `Reviewer Mode` to jump to the proof rail.
-6. Click `Replay proof`.
-7. Show `DUAL readiness`, `Proof history`, and `Demo support`.
-8. Click `Export proof`.
-9. Close with: "The claim desk can be inspected publicly, but state changes remain operator-gated."
+6. Show `Vehicle identity`, `Vehicle trust score`, `Vehicle record timeline`, and `Evidence vault`.
+7. Click `Replay proof`.
+8. Show `DUAL readiness`, `Proof history`, and `Demo support`.
+9. Click `Export proof`.
+10. Close with: "The claim desk can be inspected publicly, but state changes remain operator-gated."
 
 ## 1. Open The App
 
@@ -195,6 +200,21 @@ Presenter line:
 
 > "This is the trust receipt for the claim. It shows what was checked, what state the claim is in, and whether the app is reading from DUAL."
 
+## 4A. Show The Vehicle Record Layer
+
+Use the center panel before or after the proof rail.
+
+Call out:
+
+- `Vehicle identity`: a DVIN-style identifier derived from VIN, OEM, part serial, dealer, and DUAL object.
+- `Vehicle trust score`: a transparent score across identity, serial, coverage, mileage, dealer authority, duplicate status, and evidence completeness.
+- `Vehicle record timeline`: identity registration, mileage reading, service/replacement event, and warranty claim event.
+- `Evidence vault`: hash-only references for repair order, OEM signature, diagnostic scan, and installation image.
+
+Presenter line:
+
+> "CarrChain frames the whole automotive record. AutoChain is narrower: it builds the vehicle record evidence needed to prove a warranty claim."
+
 ## 5. Show Payment Control
 
 The payment panel is intentionally not a public execution surface.
@@ -267,6 +287,7 @@ Presenter line:
 | Why is Kraken mentioned in the repo? | Kraken is optional cross-demo interoperability. AutoChain's default proof path is standalone and does not call Kraken. |
 | Does it release real payment? | No. The payment step records claim state only; no real funds move. |
 | What is DUAL adding? | DUAL provides the object/state/proof layer and a controlled boundary between public inspection and operator mutation. |
+| Is this trying to be CarrChain? | No. CarrChain is a broad automotive records blockchain. AutoChain is a focused DUAL-backed claim verification and vehicle-record proof layer. |
 
 ## Troubleshooting During A Live Demo
 
@@ -295,6 +316,8 @@ Short close:
 - Confirm `publicWrites=false`.
 - Confirm DUAL readiness status.
 - Show canonical claim `AC-OEM-2026-0007`.
+- Show DVIN-style vehicle identity and trust score.
+- Show vehicle timeline and evidence vault.
 - Show state and next gate.
 - Click `Reviewer Mode`.
 - Click `Replay proof`.

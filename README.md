@@ -24,6 +24,11 @@ What to look for:
 - `Payment control`: payment release remains gated behind claim state and proof readiness.
 - `Proof history`: replayable checkpoints and deterministic claim/proof hashes.
 - `DUAL readiness`: runtime, write mode, readback, and public-write status.
+- `Vehicle identity`: DVIN-style identifier, VIN, DUAL object, and identity hash.
+- `Vehicle record timeline`: identity, mileage, maintenance, and warranty-claim events.
+- `Vehicle trust score`: transparent score across identity, serial, coverage, mileage, dealer, duplicate, and evidence checks.
+- `Evidence vault`: hash-only repair order, OEM signature, diagnostic scan, and image refs.
+- `Public verifier`: shareable `/proof/:claimId` route plus `/api/proof/public` JSON envelope.
 
 For presenter and operator guidance, use:
 
@@ -104,9 +109,11 @@ After the app opens:
 4. Confirm `DUAL readiness` shows whether readback is local or DUAL-backed.
 5. Inspect the canonical claim `AC-OEM-2026-0007`.
 6. Click `Replay proof` to create a new proof checkpoint.
-7. Use `Copy brief` for a reviewer summary.
-8. Use `Export proof` for a local JSON proof packet.
-9. Confirm no public action asks for an operator token or writes to DUAL.
+7. Inspect `Vehicle identity`, `Vehicle trust score`, `Vehicle record timeline`, and `Evidence vault`.
+8. Open `/proof/AC-OEM-2026-0007` for the shareable public verifier route.
+9. Use `Copy brief` for a reviewer summary.
+10. Use `Export proof` for a local JSON proof packet.
+11. Confirm no public action asks for an operator token or writes to DUAL.
 
 The happy path proves the claim can move through a deterministic gate chain. The blocked path proves unsafe claims, duplicate claims, or unready payment release can be denied before state changes.
 
@@ -220,6 +227,7 @@ Useful endpoints:
 ```text
 GET  /api/dual/status
 GET  /api/claims/current
+GET  /api/proof/public
 POST /api/claims/evaluate
 POST /api/claims/sync
 POST /api/claims/mint
@@ -272,6 +280,10 @@ Available MCP tools:
 - `autochain_dual_evaluate_gate`
 - `autochain_dual_prepare_sync_payload`
 - `autochain_dual_prepare_mint_payload`
+- `autochain_dual_run_claim_proof`
+- `autochain_dual_get_public_verifier_page`
+- `autochain_dual_red_team_claim`
+- `autochain_dual_generate_reviewer_handoff`
 - `autochain_dual_sync_claim`
 - `autochain_dual_advance_gate`
 - `autochain_dual_mint_claim`
@@ -333,6 +345,22 @@ Core fields:
 - evidence refs for repair order, OEM signature, diagnostic scan, and installation photo;
 - policy, serial, evidence, decision, claim, state, and integrity hashes;
 - latest evaluator result, reason, gate id, payment reference, and update timestamp.
+
+## CarrChain-Comparable Surface
+
+AutoChain now covers the enterprise-useful part of CarrChain-style automotive records without pretending to be a dedicated automotive chain:
+
+| CarrChain-style claim | AutoChain implementation |
+| --- | --- |
+| Vehicle identity / DVIN | DVIN-style identifier derived from VIN, OEM, part serial, DUAL object, and identity hash. |
+| Maintenance records | Claim-linked service event for the replacement part, serial, dealer, date, and proof hash. |
+| Mileage records | Claim-time odometer event checked against warranty mileage limit. |
+| Insurance/warranty claims | Canonical warranty claim object, gate chain, reimbursement state, and proof hashes. |
+| Vehicle condition/evidence | Evidence vault with hash-only document/image refs. |
+| Reputation score | Vehicle trust score with transparent scoring checks. |
+| Public explorer/verifier | `/proof/:claimId` and `/api/proof/public` expose read-only verifier envelopes. |
+
+AutoChain does not claim native CARR-style token rewards, bridging, NFT titling, vehicle ownership transfer, or a standalone automotive L1. DUAL remains the proof/control layer.
 
 Claim state machine:
 

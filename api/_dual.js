@@ -429,6 +429,150 @@ export function claimTemplateProperties(claimInput = {}) {
   };
 }
 
+export function vehicleIdentity(claimInput = {}) {
+  const claim = normalizeClaimProperties(claimInput);
+  const dvin = `DVIN-${hashJson({
+    vin: claim.vin,
+    oem: claim.oem,
+    part_serial: claim.part_serial
+  }).slice(2, 14).toUpperCase()}`;
+  return {
+    dvin,
+    vin: claim.vin,
+    vehicle: claim.vehicle,
+    owner_scope: "synthetic-demo-owner",
+    record_scope: "warranty-claim",
+    identity_hash: hashJson({
+      dvin,
+      vin: claim.vin,
+      vehicle: claim.vehicle,
+      dealer_id: claim.dealer_id
+    }),
+    dual_object_id: dualConfig().objectId || "local-autochain-claim-demo",
+    publicWrites: false
+  };
+}
+
+export function vehicleRecordTimeline(claimInput = {}) {
+  const claim = normalizeClaimProperties(claimInput);
+  return [
+    {
+      type: "identity",
+      label: "Vehicle identity registered",
+      date: claim.warranty_started_at,
+      source: claim.oem,
+      status: "verified",
+      hash: hashJson({ vin: claim.vin, vehicle: claim.vehicle, dvin: vehicleIdentity(claim).dvin })
+    },
+    {
+      type: "mileage",
+      label: "Mileage reading captured",
+      date: claim.claim_date,
+      source: claim.dealer_name,
+      status: Number(claim.odometer_km) <= Number(claim.warranty_km_limit) ? "verified" : "review",
+      value: `${Number(claim.odometer_km || 0).toLocaleString("en-US")} km`,
+      hash: hashJson({ vin: claim.vin, odometer_km: claim.odometer_km, claim_date: claim.claim_date })
+    },
+    {
+      type: "maintenance",
+      label: `${claim.part_name} replaced`,
+      date: claim.claim_date,
+      source: claim.dealer_name,
+      status: claim.serial_status === "matched" ? "verified" : "review",
+      value: claim.replacement_serial,
+      hash: hashJson({ vin: claim.vin, part_serial: claim.part_serial, replacement_serial: claim.replacement_serial })
+    },
+    {
+      type: "claim",
+      label: `Warranty claim ${claim.claim_id}`,
+      date: claim.updated_at || claim.claim_date,
+      source: "AutoChain Claim Desk",
+      status: claim.last_decision_result === "Blocked" ? "blocked" : "verified",
+      value: claim.state,
+      hash: claim.state_hash || hashJson({ claim_id: claim.claim_id, state: claim.state })
+    }
+  ];
+}
+
+export function evidenceVault(claimInput = {}) {
+  const claim = normalizeClaimProperties(claimInput);
+  return (claim.evidence_refs || []).map((item) => ({
+    type: item.type,
+    label: item.type.replace(/_/g, " "),
+    id: item.id,
+    issuer: item.issuer,
+    hash: item.hash,
+    media_type: item.type === "installation_photo" ? "image-ref" : "document-ref",
+    custody: "hash-only demo reference",
+    publicWrites: false
+  }));
+}
+
+export function vehicleTrustScore(claimInput = {}) {
+  const claim = normalizeClaimProperties(claimInput);
+  const checks = [
+    { id: "identity", label: "VIN and DUAL identity", points: 20, ok: Boolean(claim.vin && vehicleIdentity(claim).identity_hash) },
+    { id: "serial", label: "OEM serial matched", points: 20, ok: claim.serial_status === "matched" && Boolean(claim.oem_signature_valid) },
+    { id: "coverage", label: "Coverage active", points: 15, ok: Boolean(claim.coverage_active) },
+    { id: "mileage", label: "Mileage within warranty", points: 15, ok: Number(claim.odometer_km) <= Number(claim.warranty_km_limit) },
+    { id: "dealer", label: "Dealer authorized", points: 10, ok: Boolean(claim.dealer_authorized) },
+    { id: "duplicate", label: "Duplicate clear", points: 10, ok: !claim.duplicate_claim && claim.serial_status !== "duplicate" },
+    { id: "evidence", label: "Evidence pack complete", points: 10, ok: Array.isArray(claim.evidence_refs) && claim.evidence_refs.length >= 4 }
+  ];
+  const score = checks.reduce((sum, check) => sum + (check.ok ? check.points : 0), 0);
+  return {
+    score,
+    band: score >= 90 ? "trusted" : score >= 70 ? "review" : "risk",
+    checks,
+    score_hash: hashJson({ claim_id: claim.claim_id, score, checks: checks.map(({ id, ok }) => ({ id, ok })) }),
+    publicWrites: false
+  };
+}
+
+export function publicVerifierEnvelope(claimInput = {}, status = readiness()) {
+  const claim = claimTemplateProperties(claimInput);
+  const identity = vehicleIdentity(claim);
+  const timeline = vehicleRecordTimeline(claim);
+  const vault = evidenceVault(claim);
+  const trust = vehicleTrustScore(claim);
+  const content_hash = hashJson({
+    claim_id: claim.claim_id,
+    state_hash: claim.state_hash,
+    identity_hash: identity.identity_hash,
+    score_hash: trust.score_hash,
+    evidence_hash: claim.evidence_hash
+  });
+  return {
+    ok: true,
+    verifier: {
+      claim_id: claim.claim_id,
+      status: status.readbackReady ? "verified" : "local_unverified",
+      link_status: "link_unpinned",
+      content_hash,
+      checked_at: new Date().toISOString(),
+      publicWrites: false
+    },
+    claim,
+    vehicle_identity: identity,
+    vehicle_records: timeline,
+    evidence_vault: vault,
+    trust_score: trust,
+    dual: {
+      org_id: status.orgId,
+      template_id: status.templateId,
+      object_id: status.objectId,
+      readback_ready: Boolean(status.readbackReady),
+      write_mode: status.writeMode,
+      publicWrites: false
+    },
+    safety: {
+      publicWrites: false,
+      anonymousWrites: false,
+      writeBoundary: "operator_gated"
+    }
+  };
+}
+
 export function updatePayload(claimInput = {}) {
   const config = dualConfig();
   return updatePayloadByStyle("direct_custom", config.objectId || "local-autochain-claim-demo", normalizeClaimProperties(claimInput), semanticMetadata("autochain_claim_synced", normalizeClaimProperties(claimInput)));
