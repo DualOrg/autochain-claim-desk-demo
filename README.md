@@ -346,11 +346,11 @@ Core fields:
 - policy, serial, evidence, decision, claim, state, and integrity hashes;
 - latest evaluator result, reason, gate id, payment reference, and update timestamp.
 
-## CarrChain-Comparable Surface
+## Automotive Record Surface
 
-AutoChain now covers the enterprise-useful part of CarrChain-style automotive records without pretending to be a dedicated automotive chain:
+AutoChain covers the enterprise-useful parts of an automotive record without pretending to be a dedicated automotive chain:
 
-| CarrChain-style claim | AutoChain implementation |
+| Automotive record claim | AutoChain implementation |
 | --- | --- |
 | Vehicle identity / DVIN | DVIN-style identifier derived from VIN, OEM, part serial, DUAL object, and identity hash. |
 | Maintenance records | Claim-linked service event for the replacement part, serial, dealer, date, and proof hash. |
@@ -360,7 +360,7 @@ AutoChain now covers the enterprise-useful part of CarrChain-style automotive re
 | Reputation score | Vehicle trust score with transparent scoring checks. |
 | Public explorer/verifier | `/proof/:claimId` and `/api/proof/public` expose read-only verifier envelopes. |
 
-AutoChain does not claim native CARR-style token rewards, bridging, NFT titling, vehicle ownership transfer, or a standalone automotive L1. DUAL remains the proof/control layer.
+AutoChain does not claim token rewards, bridging, NFT titling, vehicle ownership transfer, or a standalone automotive L1. DUAL remains the proof/control layer.
 
 Claim state machine:
 

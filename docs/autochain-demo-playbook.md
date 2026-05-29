@@ -213,7 +213,7 @@ Call out:
 
 Presenter line:
 
-> "CarrChain frames the whole automotive record. AutoChain is narrower: it builds the vehicle record evidence needed to prove a warranty claim."
+> "AutoChain is deliberately focused: it builds the vehicle record evidence needed to prove a warranty claim."
 
 ## 5. Show Payment Control
 
@@ -287,7 +287,7 @@ Presenter line:
 | Why is Kraken mentioned in the repo? | Kraken is optional cross-demo interoperability. AutoChain's default proof path is standalone and does not call Kraken. |
 | Does it release real payment? | No. The payment step records claim state only; no real funds move. |
 | What is DUAL adding? | DUAL provides the object/state/proof layer and a controlled boundary between public inspection and operator mutation. |
-| Is this trying to be CarrChain? | No. CarrChain is a broad automotive records blockchain. AutoChain is a focused DUAL-backed claim verification and vehicle-record proof layer. |
+| Is this trying to be a full automotive chain? | No. AutoChain is a focused DUAL-backed claim verification and vehicle-record proof layer. |
 
 ## Troubleshooting During A Live Demo
 

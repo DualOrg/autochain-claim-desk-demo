@@ -55,7 +55,7 @@ The proof initializes AutoChain MCP, reads the live claim, confirms the standalo
 
 ## Public verifier flow
 
-Use this for CarrChain-style automotive-record inspection without opening a write path.
+Use this for automotive-record inspection without opening a write path.
 
 ```text
 curl -s https://autochain-eight.vercel.app/mcp \
