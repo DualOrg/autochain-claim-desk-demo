@@ -660,6 +660,9 @@ function renderReadiness() {
   if (!status) {
     box.className = "readiness";
     box.innerHTML = "<span>Readiness</span><p>Checking local DUAL boundary...</p>";
+    setTextIfPresent("runtimeMode", "local / deterministic");
+    setTextIfPresent("writableMode", "operator gated");
+    setTextIfPresent("readbackMode", "checking");
     return;
   }
   box.className = status.writable ? "readiness ok" : "readiness";
@@ -669,6 +672,9 @@ function renderReadiness() {
     <p>${status.readbackReady ? "DUAL readback configured." : "Local deterministic proof mode."} Public writes remain disabled.${missing}</p>
   `;
   $("dualStatusChip").textContent = status.readbackReady ? "DUAL readback ready" : "Local proof";
+  setTextIfPresent("runtimeMode", status.persistenceMode ? `vercel / ${status.persistenceMode}` : "local / deterministic");
+  setTextIfPresent("writableMode", status.writeMode || "operator gated");
+  setTextIfPresent("readbackMode", status.readbackReady ? "configured" : "local");
 }
 
 function renderMcpHistory() {
@@ -1121,6 +1127,11 @@ function localHash(input) {
   return `0x${(a + b).repeat(4).slice(0, 64)}`;
 }
 
+function setTextIfPresent(id, value) {
+  const node = $(id);
+  if (node) node.textContent = value;
+}
+
 $("statusButton").addEventListener("click", () => refreshStatus().catch(showError));
 $("verifyButton").addEventListener("click", () => verifyNextGate().catch(showError));
 $("infoButton").addEventListener("click", requestInfo);
@@ -1130,6 +1141,11 @@ $("attachEvidenceButton").addEventListener("click", attachMissingEvidence);
 $("replayProofButton").addEventListener("click", () => replayProof().catch(showError));
 $("copyBriefButton").addEventListener("click", () => copyReviewerBrief().catch(showError));
 $("exportProofButton").addEventListener("click", exportProofPacket);
+$("headerCopyBriefButton").addEventListener("click", () => copyReviewerBrief().catch(showError));
+$("headerExportProofButton").addEventListener("click", exportProofPacket);
+$("reviewerModeButton").addEventListener("click", () => {
+  $("proofRail").scrollIntoView({ behavior: "smooth", block: "start" });
+});
 $("claimQueueList").addEventListener("click", (event) => {
   const item = event.target.closest("[data-claim-id]");
   if (item) selectClaim(item.dataset.claimId);

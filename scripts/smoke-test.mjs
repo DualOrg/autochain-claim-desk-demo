@@ -42,9 +42,12 @@ const home = await fetch(baseUrl);
 assert(home.ok, "home page loads");
 const homeText = await home.text();
 assert(homeText.includes("AutoChain Claim Desk"), "home page includes demo title");
+assert(homeText.includes("Synthetic claim, live DUAL proof"), "home page includes demo disclosure");
+assert(homeText.includes("60-90 second reviewer walkthrough"), "home page includes reviewer walkthrough");
 assert(homeText.includes("Claim queue"), "home page includes claim queue");
 assert(homeText.includes("Payment control"), "home page includes payment controls");
 assert(homeText.includes("Proof history"), "home page includes proof history");
+assert(homeText.includes("Demo support"), "home page includes demo support");
 
 const status = await request("/api/dual/status");
 assert(status.response.ok, "status endpoint returns 200");

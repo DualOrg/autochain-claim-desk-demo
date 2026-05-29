@@ -14,6 +14,7 @@ The demo shows an OEM warranty administrator validating one dealer claim for a B
 - operator-gated sync/mint endpoints and MCP write tools that execute event-bus writes only when live-write env and `DEMO_OPERATOR_TOKEN` are configured.
 - reviewer-grade claim queue with SLA, priority, risk, evidence completeness, and exposure summaries;
 - evidence review controls, payment-release readiness checks, replayable proof checkpoints, reviewer brief copy, and proof-packet export.
+- TradeFlow-standard reviewer onboarding: sticky metadata bar, synthetic/live-proof disclosure, 60-90 second walkthrough, demo script, support panel, compact DUAL readiness cards, and proof rail copy that keeps the public-write boundary visible.
 
 Production target:
 

@@ -4,26 +4,95 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AutoChain Claim Desk</title>
-    <link rel="stylesheet" href="./styles.css?v=20260528-operator-console" />
+    <link rel="stylesheet" href="./styles.css?v=20260529-tradeflow-standard-4" />
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">
-          <img src="./assets/dual-mark.svg" alt="" class="brand-mark" />
-          <div>
+          <a class="brand-logo" href="/" aria-label="DUAL AutoChain">
+            <img src="./assets/dual-mark.svg" alt="" class="brand-mark" />
+          </a>
+          <div class="brand-copy">
             <h1>AutoChain Claim Desk</h1>
             <p>OEM warranty claim validation on DUAL</p>
+          </div>
+        </div>
+        <div class="header-meta" aria-label="Demo metadata">
+          <div>
+            <span>Claim network</span>
+            <strong>OEM dealer warranty</strong>
+          </div>
+          <div>
+            <span>Canonical claim</span>
+            <strong>AC-OEM-2026-0007</strong>
+          </div>
+          <div>
+            <span>DUAL object</span>
+            <strong>6a16d6a8...1f6cdb2</strong>
           </div>
         </div>
         <div class="topbar-actions">
           <button class="icon-button" id="statusButton" type="button" aria-label="Refresh DUAL readiness">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.3 6.4M3 12A9 9 0 0 1 18.3 5.6M18 9V5h4M6 15v4H2"/></svg>
           </button>
+          <button class="secondary-button compact-action" id="reviewerModeButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            Reviewer Mode
+          </button>
+          <button class="secondary-button compact-action" id="headerCopyBriefButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h10v12H8zM6 16H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+            Copy brief
+          </button>
+          <button class="primary-button compact-action" id="headerExportProofButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+            Export proof
+          </button>
           <div class="status-chip" id="dualStatusChip">Local proof</div>
           <div class="status-chip status-chip-safe">publicWrites=false</div>
         </div>
       </header>
+
+      <section class="demo-disclosure" aria-label="Demo disclosure">
+        <strong>Synthetic claim, live DUAL proof.</strong>
+        <span>Dealer, vehicle, and evidence details are demo data. The DUAL object, readback hashes, state gate, proof packet, and operator-gated write boundary are the real review surface.</span>
+      </section>
+
+      <section class="walkthrough-band" aria-label="Reviewer walkthrough">
+        <div class="walkthrough-copy">
+          <strong>60-90 second reviewer walkthrough</strong>
+          <span>Start with DUAL readiness, open the canonical claim, replay the proof, export the reviewer packet, then verify that public writes remain disabled.</span>
+          <div class="walkthrough-steps" aria-label="Walkthrough steps">
+            <span>1 Readback</span>
+            <span>2 Gate chain</span>
+            <span>3 Evidence</span>
+            <span>4 Export</span>
+          </div>
+        </div>
+        <div class="walkthrough-card" aria-hidden="true">
+          <div class="walkthrough-window">
+            <div class="walkthrough-window-bar"><span></span><span></span><span></span></div>
+            <div class="walkthrough-mini-grid">
+              <div>
+                <small>Claim</small>
+                <strong>AC-OEM-2026-0007</strong>
+              </div>
+              <div>
+                <small>State</small>
+                <strong>Approved</strong>
+              </div>
+              <div>
+                <small>Next gate</small>
+                <strong>Mark paid</strong>
+              </div>
+              <div>
+                <small>Boundary</small>
+                <strong>Operator gated</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <main class="workspace">
         <aside class="state-rail panel">
@@ -42,6 +111,18 @@
           <div class="rail-footer">
             <span>Template</span>
             <code>io.dual.autochain_claim.demo.v1</code>
+          </div>
+          <div class="reviewer-guide">
+            <div class="table-header">
+              <span>Demo script</span>
+              <strong>90s</strong>
+            </div>
+            <ol>
+              <li>Show the live DUAL readback status.</li>
+              <li>Select the canonical approved claim.</li>
+              <li>Replay the next proof gate read-only.</li>
+              <li>Export the proof packet for review.</li>
+            </ol>
           </div>
         </aside>
 
@@ -71,6 +152,24 @@
               <span>Exposure</span>
               <strong id="exposureValue">$1,189</strong>
             </div>
+          </div>
+
+          <div class="demo-context-grid" aria-label="Demo content support">
+            <article>
+              <span>Who cares</span>
+              <strong>OEM warranty teams</strong>
+              <p>Stops duplicate part reimbursement while preserving a dealer-friendly review path.</p>
+            </article>
+            <article>
+              <span>What DUAL proves</span>
+              <strong>Gate state + evidence hashes</strong>
+              <p>Every claim decision can be re-derived from the state machine and anchored evidence.</p>
+            </article>
+            <article>
+              <span>What is blocked</span>
+              <strong>Public payment writes</strong>
+              <p>The demo exports proof locally; live writes stay behind the operator token boundary.</p>
+            </article>
           </div>
 
           <div class="claim-grid">
@@ -158,14 +257,36 @@
           </div>
         </section>
 
-        <aside class="inspector panel">
+        <aside class="inspector panel" id="proofRail">
           <div class="panel-title">
-            <span>DUAL object</span>
+            <span>DUAL readiness</span>
             <strong id="proofMode">local</strong>
+          </div>
+          <div class="readiness-grid" aria-label="DUAL readiness summary">
+            <div>
+              <span>Runtime</span>
+              <strong id="runtimeMode">local / deterministic</strong>
+            </div>
+            <div>
+              <span>Writable</span>
+              <strong id="writableMode">operator gated</strong>
+            </div>
+            <div>
+              <span>Readback</span>
+              <strong id="readbackMode">checking</strong>
+            </div>
+            <div>
+              <span>Public writes</span>
+              <strong>disabled</strong>
+            </div>
           </div>
           <div class="object-summary">
             <span>Object</span>
             <code id="objectId">local-autochain-claim-demo</code>
+          </div>
+          <div class="proof-rail-title">
+            <span>Proof rail</span>
+            <strong>re-derived</strong>
           </div>
           <div class="hash-list" id="hashList"></div>
           <div class="readiness" id="readinessBox">
@@ -200,6 +321,17 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
             Reset demo
           </button>
+          <div class="support-panel" id="supportPanel">
+            <div class="table-header">
+              <span>Demo support</span>
+              <strong>ready</strong>
+            </div>
+            <ul>
+              <li>Reviewer brief copies state, next gate, risk, evidence, and hashes.</li>
+              <li>JSON proof packet is generated in-browser with no DUAL write.</li>
+              <li><code>npm run proof:chain</code> replays the standalone proof from the repo.</li>
+            </ul>
+          </div>
         </aside>
       </main>
 
@@ -211,6 +343,6 @@
         <div class="audit-list" id="auditList"></div>
       </section>
     </div>
-    <script type="module" src="./client.js?v=20260528-operator-console"></script>
+    <script type="module" src="./client.js?v=20260529-tradeflow-standard-4"></script>
   </body>
 </html>
