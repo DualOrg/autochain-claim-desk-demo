@@ -75,15 +75,16 @@ code {
 .brand-logo {
   display: inline-flex;
   align-items: center;
-  height: 36px;
+  height: 38px;
   padding-right: 16px;
   border-right: 1px solid var(--line);
   text-decoration: none;
 }
 
 .brand-mark {
-  width: 36px;
-  height: 36px;
+  width: 146px;
+  height: auto;
+  max-height: 38px;
   flex: 0 0 auto;
 }
 
@@ -1311,6 +1312,16 @@ h1 {
   .topbar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .brand-logo {
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  .brand-mark {
+    width: 126px;
+    max-height: 34px;
   }
 
   .demo-disclosure,

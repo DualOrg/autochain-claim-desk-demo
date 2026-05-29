@@ -42,6 +42,7 @@ const home = await fetch(baseUrl);
 assert(home.ok, "home page loads");
 const homeText = await home.text();
 assert(homeText.includes("AutoChain Claim Desk"), "home page includes demo title");
+assert(homeText.includes("./assets/dual-logo.svg"), "home page uses official DUAL logo");
 assert(homeText.includes("Synthetic claim, live DUAL proof"), "home page includes demo disclosure");
 assert(homeText.includes("60-90 second reviewer walkthrough"), "home page includes reviewer walkthrough");
 assert(homeText.includes("Claim queue"), "home page includes claim queue");
