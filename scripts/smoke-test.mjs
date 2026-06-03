@@ -41,24 +41,21 @@ async function rpc(method, params = {}) {
 const home = await fetch(baseUrl);
 assert(home.ok, "home page loads");
 const homeText = await home.text();
-assert(homeText.includes("AutoChain Claim Desk"), "home page includes demo title");
-assert(homeText.includes("/assets/dual-logo.svg"), "home page uses official DUAL logo");
-assert(homeText.includes("Synthetic claim, live DUAL proof"), "home page includes demo disclosure");
-assert(homeText.includes("60-90 second reviewer walkthrough"), "home page includes reviewer walkthrough");
-assert(homeText.includes("Claim queue"), "home page includes claim queue");
-assert(homeText.includes("Payment control"), "home page includes payment controls");
-assert(homeText.includes("Proof history"), "home page includes proof history");
-assert(homeText.includes("Demo support"), "home page includes demo support");
-assert(homeText.includes("Vehicle identity"), "home page includes vehicle identity panel");
-assert(homeText.includes("Vehicle trust score"), "home page includes vehicle trust score");
-assert(homeText.includes("Vehicle record timeline"), "home page includes vehicle record timeline");
-assert(homeText.includes("Evidence vault"), "home page includes evidence vault");
-assert(homeText.includes("Public verifier"), "home page includes public verifier route support");
+assert(homeText.includes("AutoChain Claim Console"), "home page includes console title");
+assert(homeText.includes("/assets/dual-mark.svg"), "home page uses official DUAL mark");
+assert(homeText.includes("publicWrites=false"), "home page includes publicWrites=false boundary metadata");
+assert(homeText.includes("/core.jsx"), "home page includes claim console core component");
+assert(homeText.includes("/railLeft.jsx"), "home page includes queue/readiness rail component");
+assert(homeText.includes("/center.jsx"), "home page includes claim workflow component");
+assert(homeText.includes("/proofRail.jsx"), "home page includes proof rail component");
+assert(homeText.includes("/App.jsx"), "home page includes application wrapper component");
+assert(homeText.includes("autochain-boot"), "home page includes boot payload");
 
 const proofPage = await fetch(`${baseUrl}/proof/AC-OEM-2026-0007`);
 assert(proofPage.ok, "public proof route loads");
 const proofPageText = await proofPage.text();
-assert(proofPageText.includes("Public verifier"), "public proof route includes verifier shell");
+assert(proofPageText.includes("AutoChain Claim Console"), "public proof route includes console shell");
+assert(proofPageText.includes("public verifier route"), "public proof route includes verifier metadata");
 
 const status = await request("/api/dual/status");
 assert(status.response.ok, "status endpoint returns 200");

@@ -9,7 +9,7 @@ import syncHandler from "./api/claims/sync.js";
 import mintHandler from "./api/claims/mint.js";
 import mcpHandler from "./api/mcp.js";
 import publicProofHandler from "./api/proof/public.js";
-import { readCurrentObject, readiness } from "./api/_dual.js";
+import { readCurrentObject, readiness, seedClaimProperties } from "./api/_dual.js";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 await loadDotEnv();
@@ -32,6 +32,7 @@ const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".jsx": "text/babel; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml; charset=utf-8",
   ".png": "image/png"
@@ -100,12 +101,23 @@ async function injectBootPayload(html) {
   const payload = await buildBootPayload();
   const json = JSON.stringify(payload).replace(/</g, "\\u003c");
   const boot = `<script id="autochain-boot" type="application/json">${json}</script>`;
-  return html.replace("<script type=\"module\"", `${boot}\n    <script type=\"module"`);
+  if (html.includes("<script type=\"module\"")) {
+    return html.replace("<script type=\"module\"", `${boot}\n    <script type=\"module"`);
+  }
+  if (html.includes("</body>")) {
+    return html.replace("</body>", `    ${boot}\n  </body>`);
+  }
+  return `${html}\n${boot}`;
 }
 
 async function buildBootPayload() {
   const status = readiness();
-  if (!status.readbackReady) return { dualStatus: status };
+  if (!status.readbackReady) {
+    return {
+      dualStatus: status,
+      claim: seedClaimProperties()
+    };
+  }
   try {
     const current = await readCurrentObject();
     return {
