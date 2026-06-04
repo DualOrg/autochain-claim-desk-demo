@@ -864,12 +864,14 @@ function resource(uri, name, description) {
 }
 
 function safetyState() {
+  const status = readiness();
   return {
     publicWrites: false,
     readToolsPublic: true,
     writeToolsExposed: true,
     writeTools: "operator_gated",
-    operatorGateConfigured: readiness().operatorGateConfigured,
+    operatorGateConfigured: status.operatorGateConfigured,
+    networkMigration: status.network,
     anonymousWrites: false
   };
 }

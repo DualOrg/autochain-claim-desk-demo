@@ -6,8 +6,9 @@
   "description": "DUAL AutoChain warranty claim validation demo",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check client.js && node --check server.mjs && node --check api/_dual.js && node --check api/dual/status.js && node --check api/claims/current.js && node --check api/claims/evaluate.js && node --check api/claims/sync.js && node --check api/claims/mint.js && node --check api/proof/public.js && node --check api/mcp.js && node --check scripts/smoke-test.mjs && node --check scripts/setup-live-dual.mjs && node --check scripts/autochain-agent-harness.mjs && node --check scripts/autochain-proof.mjs && node --check integration-proofs/kraken-full-chain-proof.mjs",
+    "check": "node --check client.js && node --check server.mjs && node --check api/_dual.js && node --check api/dual/status.js && node --check api/claims/current.js && node --check api/claims/evaluate.js && node --check api/claims/sync.js && node --check api/claims/mint.js && node --check api/proof/public.js && node --check api/mcp.js && node --check scripts/smoke-test.mjs && node --check scripts/mainnet-migration-preflight.mjs && node --check scripts/setup-live-dual.mjs && node --check scripts/autochain-agent-harness.mjs && node --check scripts/autochain-proof.mjs && node --check integration-proofs/kraken-full-chain-proof.mjs",
     "smoke": "node scripts/smoke-test.mjs",
+    "migrate:mainnet:preflight": "node scripts/mainnet-migration-preflight.mjs",
     "setup:dual-live": "node scripts/setup-live-dual.mjs",
     "agent:harness": "node scripts/autochain-agent-harness.mjs",
     "proof:chain": "node scripts/autochain-proof.mjs",
